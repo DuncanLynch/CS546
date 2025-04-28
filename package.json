@@ -1,0 +1,23 @@
+{
+  "name": "cs546",
+  "version": "1.0.0",
+  "description": "CS546 Final Project: Rate My Classy! Made by: Duncan, Gabe, Lewis, Alan.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DuncanLynch/CS546.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DuncanLynch/CS546/issues"
+  },
+  "homepage": "https://github.com/DuncanLynch/CS546#readme",
+  "dependencies": {
+    "express-session": "^1.18.1",
+    "mongodb": "^6.16.0"
+  }
+}
