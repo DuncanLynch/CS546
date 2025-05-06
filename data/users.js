@@ -1,14 +1,14 @@
 //Imports
 
 //Data Functions:
-export function createUser(user_name, password, email) {}
+export async function createUser(user_name, password, email) {}
 
-export function getUserById(id) {}
+export async function getUserById(id) {}
 
-export function getAllUsers() {}
+export async function getAllUsers() {}
 
-export function deleteUser(id) {}
+export async function deleteUser(id) {}
 
-export function addReview(user_id, review_object) {}
+export async function addReview(user_id, review_object) {}
 
-export function validateUser(user_name, password) {}
+export async function validateUser(user_name, password) {}
