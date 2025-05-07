@@ -1,6 +1,6 @@
 //Imports
 import { ObjectId } from "mongodb";
-import { profs } from "../mongodb/mongoCollections";
+import { profs } from "../mongodb/mongoCollections.js";
 //Data Functions:
 export async function createProfessor(professor_name, course_id, email) {
     // Validate

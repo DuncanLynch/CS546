@@ -1,6 +1,6 @@
 // Imports
 import { ObjectId } from "mongodb";
-import { classes } from "../mongodb/mongoCollections";
+import { classes } from "../mongodb/mongoCollections.js";
 
 // Data Functions:
 
