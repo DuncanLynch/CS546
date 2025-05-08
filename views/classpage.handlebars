@@ -1,0 +1,29 @@
+<script src="/js/main.js"></script>
+
+<p>Idea: Display all info regarding class found</p>
+
+<h2>Course Found! {{course_code}}: {{course_name}}</h2>
+<br>
+<p>PreRequisites: {{prerequisites}}</p>
+<br>
+<p>Course Description: {{course_description}}</p>
+<br>
+<p>Semester(s) Offered: {{course_instructor}}</p>
+<br>
+<p>Professor(s): {{professors}}</p>
+<br>
+<p>Overall Rating: {{class_total_rating}}</p>
+<br>
+<p>Overall Quality: {{class_total_quality}}</p>
+<br>
+<p>Overall Difficulty: {{class_total_difficulty}}</p>
+<br>
+<p>Reviews:</p>
+<ul>
+  {{#each reviews}}
+    <li>
+      <p>Title: {{review_title}}</p>
+      <p>Rating: {{this.rating}}</p>
+      <p>Review: {{this.review}}</p>
+    </li>
+  {{/each}}
