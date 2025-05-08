@@ -1,6 +1,7 @@
 // Imports
 import { ObjectId } from "mongodb";
 import { classes } from "../mongodb/mongoCollections";
+import { process_id, validate, validate_string } from "../validation";
 
 // Data Functions:
 
@@ -94,7 +95,8 @@ export async function addReview(class_id, course_code, professor_id, review_titl
 }
 
 export async function addProfessor(class_id, professor_id) {
-    if (!ObjectId.isValid(class_id)) throw new Error("Invalid class ID format");
+    validate(class_id, validate_string, [process_id]);
+    validate(professor_id, validate_string, [process_id]);
     const _id = new ObjectId(class_id);
 
     const classCollection = await classes();
