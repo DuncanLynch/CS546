@@ -1,7 +1,7 @@
 // Imports
 import { ObjectId } from "mongodb";
-import { classes } from "../mongodb/mongoCollections";
-import { process_id, validate, validate_string } from "../validation";
+import { classes } from "../mongodb/mongoCollections.js";
+import { process_id, validate, validate_string } from "../validation.js";
 
 // Data Functions:
 

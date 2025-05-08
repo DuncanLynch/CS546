@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "CS546 Final Project: Rate My Classy! Made by: Duncan, Gabe, Lewis, Alan.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,6 +19,7 @@
   "homepage": "https://github.com/DuncanLynch/CS546#readme",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "cheerio": "^1.0.0",
     "express": "^4.18.2",
     "express-handlebars": "^7.1.2",
     "express-session": "^1.18.1",

@@ -73,3 +73,58 @@ export async function validateUser(user_name, password) {
 
     return { _id: user._id, user_name: user.user_name, email: user.email };
 }
+
+
+export async function updateReview(class_id, reviewer_id, review_date, updatedFields) {
+    if (!ObjectId.isValid(class_id)) throw new Error("Invalid class ID format");
+    const _id = new ObjectId(class_id);
+
+    const userCollection = await users();
+
+    const updateResult = await userCollection.updateOne(
+        {
+            _id,
+            "reviews.reviewer_id": reviewer_id,
+            "reviews.review_date": review_date
+        },
+        {
+            $set: Object.fromEntries(
+                Object.entries(updatedFields).map(([key, value]) => [`reviews.$.${key}`, value])
+            )
+        }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+        throw new Error("Failed to update review: review not found or no changes made.");
+    }
+
+    const updatedClass = await classCollection.findOne({ _id });
+    updatedClass._id = updatedClass._id.toString();
+    return updatedClass;
+}
+
+export async function deleteReview(class_id, reviewer_id, review_date) {
+    if (!ObjectId.isValid(class_id)) throw new Error("Invalid class ID format");
+    const _id = new ObjectId(class_id);
+
+    const userCollection = await users();
+    const updateResult = await userCollection.updateOne(
+        { _id },
+        {
+            $pull: {
+                reviews: {
+                    reviewer_id: reviewer_id,
+                    review_date: review_date
+                }
+            }
+        }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+        throw new Error("Failed to delete review: review not found.");
+    }
+
+    const updatedClass = await userCollection.findOne({ _id });
+    updatedClass._id = updatedClass._id.toString();
+    return updatedClass;
+}
