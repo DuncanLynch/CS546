@@ -1,25 +1,49 @@
 //Imports
 import { ObjectId } from "mongodb";
 import { profs } from "../mongodb/mongoCollections.js";
+import { validate, validate_professor_name, validate_string, process_id, validate_stevens_email } from "../validation.js";
 //Data Functions:
 export async function createProfessor(professor_name, course_id, email) {
-    // Validate
+    validate(professor_name, validate_string, [validate_professor_name]);
+    validate(course_id, validate_string, [process_id]);
+    validate(email, validate_string, [validate_stevens_email]);
+
     const professorCollection = await profs();
+
+    const dup = await professorCollection.findOne({ email });
+
+    if (dup) {
+        if (!dup.courses.includes(course_id)) {
+            await professorCollection.updateOne(
+                { email },
+                { $push: { courses: course_id } }
+            );
+            dup.courses.push(course_id); // reflect the update in the returned object
+        }
+        return {
+            ...dup,
+            _id: dup._id.toString()
+        };
+    }
+
     const newProfessor = {
         professor_name,
         courses: [course_id],
         email
     };
-    let info = await professorCollection.insertOne(newProfessor);
-    if (!info) throw new Error("Failed to insert professor!");
+
+    const info = await professorCollection.insertOne(newProfessor);
+    if (!info.insertedId) throw new Error("Failed to insert professor!");
+
     return {
         ...newProfessor,
-          _id: info._id.toString() 
+        _id: info.insertedId.toString()
     };
 }
 
+
 export async function getProfessorById(id) {
-    // Validate
+    validate(id, validate_string, [process_id]);
     const professorCollection = await profs();
     const _id = new ObjectId(id);
     let info = await professorCollection.findOne(_id);
@@ -37,7 +61,7 @@ export async function getAllProfessors() {
 }
 
 export async function deleteProfessor(id) {
-    if (!ObjectId.isValid(id)) throw new Error("Invalid ID format");
+    validate(id, validate_string, [process_id]);
     const _id = new ObjectId(id);
     
     const professorCollection = await profs();
@@ -48,7 +72,8 @@ export async function deleteProfessor(id) {
 }
 
 export async function addCourse(professor_id, class_id) {
-    if (!ObjectId.isValid(professor_id)) throw new Error("Invalid professor ID format");
+    validate(professor_id, validate_string, [process_id]);
+    validate(class_id, validate_string, [process_id]);
 
     const _id = new ObjectId(professor_id);
     const professorCollection = await profs();

@@ -1,11 +1,14 @@
 // Imports
 import { ObjectId } from "mongodb";
 import { classes } from "../mongodb/mongoCollections.js";
+import { process_id, validate, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_mmddyyyy_date, validate_number, validate_user_name } from "../validation.js";
 
 // Data Functions:
 
-export async function createClass(course_code, course_name, course_description, typically_offered, prerequisites, class_total_rating, class_total_difficulty, class_total_quality) {
-    // TODO: Add validation here
+export async function createClass(course_code, course_name, course_description, typically_offered, prerequisites) {
+    validate(course_code, validate_string, [process_course_code]);
+    validate(course_name, validate_string, []);
+    validate(course_description, validate_string, []);
 
     const newClass = {
         course_code,
@@ -13,9 +16,11 @@ export async function createClass(course_code, course_name, course_description, 
         course_description,
         typically_offered,
         prerequisites,
-        class_total_rating,
-        class_total_difficulty,
-        class_total_quality
+        class_difficulty_rating: 0,
+        class_quality_rating: 0,
+        class_total_rating: 0,
+        reviews: [],
+        professors: []
     };
 
     const classCollection = await classes();
@@ -31,12 +36,23 @@ export async function createClass(course_code, course_name, course_description, 
 }
 
 export async function getClassById(id) {
-    if (!ObjectId.isValid(id)) throw new Error("Invalid ID format");
+    validate(id, validate_string, [process_id]);
     const _id = new ObjectId(id);
 
     const classCollection = await classes();
     const classDoc = await classCollection.findOne({ _id });
     if (!classDoc) throw new Error("Class not found");
+
+    classDoc._id = classDoc._id.toString();
+    return classDoc;
+}
+
+export async function getClassbyCourseCode(cc) {
+    validate(cc, validate_string);
+    const classCollection = await classes();
+
+    const classDoc = await classCollection.findOne({ course_code: cc });
+    if (!classDoc) throw new Error("Class not found with the given course code");
 
     classDoc._id = classDoc._id.toString();
     return classDoc;
@@ -52,7 +68,7 @@ export async function getAllClasses() {
 }
 
 export async function deleteClass(id) {
-    if (!ObjectId.isValid(id)) throw new Error("Invalid ID format");
+    validate(id, validate_string, [process_id]);
     const _id = new ObjectId(id);
 
     const classCollection = await classes();
@@ -62,39 +78,70 @@ export async function deleteClass(id) {
     return true;
 }
 
-export async function addReview(class_id, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, likes, dislikes, review_quality_rating, review_difficulty_rating, review_total_rating) {
-    if (!ObjectId.isValid(class_id)) throw new Error("Invalid class ID format");
+export async function addReview(class_id, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, likes, dislikes, review_quality_rating, review_difficulty_rating, review_total_rating, _rid, reviewer_name) {
+    validate(class_id, validate_string, [process_id]);
+    validate(reviewer_id, validate_string, [process_id]);
+    validate(professor_id, validate_string, [process_id]);
+    validate(_rid, validate_string, [process_id]);
+    validate(reviewer_name, validate_string, [validate_user_name])
+    validate(course_code, validate_string, [process_course_code]);
+    validate(review_title, validate_string, []);
+    validate(review_date, validate_string, [validate_mmddyyyy_date]);
+    validate(review_contents, validate_string, []);
+    validate(likes, validate_number, [process_unsignedint]);
+    validate(dislikes, validate_number, [process_unsignedint]);
+    validate(review_quality_rating, validate_number, [process_numerical_rating]);
+    validate(review_difficulty_rating, validate_number, [process_numerical_rating]);
+    validate(review_total_rating, validate_number, [process_numerical_rating]);
+
+
     const _id = new ObjectId(class_id);
+    const _ridObj = new ObjectId(_rid);
 
     const classCollection = await classes();
-    const updateResult = await classCollection.updateOne(
+    const currentClass = await classCollection.findOne({ _id });
+    const tr = (review_total_rating + currentClass.class_total_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
+    const dr = (review_difficulty_rating + currentClass.class_difficulty_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
+    const qr = (review_quality_rating + currentClass.class_quality_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
+    const updateResult = await classCollection.findOneAndUpdate(
         { _id },
         {
             $push: {
                 reviews: {
+                    _rid: _ridObj,
                     course_code,
                     professor_id,
                     review_title,
                     reviewer_id,
+                    reviewer_name,
                     review_date,
                     review_contents,
                     likes,
                     dislikes,
                     review_quality_rating,
                     review_difficulty_rating,
-                    review_total_rating
+                    review_total_rating,
+                    comments: []
                 }
+            },
+            $set: {
+                class_total_rating: tr, 
+                class_difficulty_rating: dr, 
+                class_quality_rating: qr
             }
-        }
+        },
+        { returnDocument: "after" } // returns the updated document
     );
 
-    if (updateResult.modifiedCount === 0) throw new Error("Failed to add review");
+    if (!updateResult) throw new Error("Failed to add review");
 
-    return true;
+    updateResult._id = updateResult._id.toString();
+    return updateResult;
 }
 
 export async function addProfessor(class_id, professor_id) {
-    if (!ObjectId.isValid(class_id)) throw new Error("Invalid class ID format");
+    validate(class_id, validate_string, [process_id]);
+    validate(professor_id, validate_string, [process_id]);
     const _id = new ObjectId(class_id);
 
     const classCollection = await classes();
@@ -106,4 +153,98 @@ export async function addProfessor(class_id, professor_id) {
     if (updateResult.modifiedCount === 0) throw new Error("Failed to add professor");
 
     return true;
+}
+
+export async function updateReview(class_id, reviewer_id, review_date, updatedFields) {
+    validate(class_id, validate_string, [process_id]);
+    validate(reviewer_id, validate_string, [process_id]);
+    validate(review_date, validate_string, [validate_mmddyyyy_date]);
+    const _id = new ObjectId(class_id);
+
+    const classCollection = await classes();
+
+    const updateResult = await classCollection.updateOne(
+        {
+            _id,
+            "reviews.reviewer_id": reviewer_id,
+            "reviews.review_date": review_date
+        },
+        {
+            $set: Object.fromEntries(
+                Object.entries(updatedFields).map(([key, value]) => [`reviews.$.${key}`, value])
+            )
+        }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+        throw new Error("Failed to update review: review not found or no changes made.");
+    }
+
+    const updatedClass = await classCollection.findOne({ _id });
+    updatedClass._id = updatedClass._id.toString();
+    return updatedClass;
+}
+
+export async function deleteReview(class_id, reviewer_id, review_date) {
+    validate(class_id, validate_string, [process_id]);
+    validate(reviewer_id, validate_string, [process_id]);
+    validate(review_date, validate_string, [validate_mmddyyyy_date]);
+    const _id = new ObjectId(class_id);
+
+    const classCollection = await classes();
+    const updateResult = await classCollection.updateOne(
+        { _id },
+        {
+            $pull: {
+                reviews: {
+                    reviewer_id: reviewer_id,
+                    review_date: review_date
+                }
+            }
+        }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+        throw new Error("Failed to delete review: review not found.");
+    }
+
+    const updatedClass = await classCollection.findOne({ _id });
+    updatedClass._id = updatedClass._id.toString();
+    return updatedClass;
+}
+
+export async function addComment(classId, reviewId, userId, commentText) {
+    classId = validate(classId, validate_string);
+    reviewId = validate(reviewId, validate_string);
+    userId = validate(userId, validate_string);
+    commentText = validate(commentText, validate_string);
+
+    if (!ObjectId.isValid(classId)) throw new Error("Invalid class ID.");
+    if (!ObjectId.isValid(reviewId)) throw new Error("Invalid review ID.");
+    if (!ObjectId.isValid(userId)) throw new Error("Invalid user ID.");
+
+    const comment = {
+        _id: new ObjectId(),
+        userId: new ObjectId(userId),
+        text: commentText.trim(),
+        date: new Date().toISOString()
+    };
+
+    const classCollection = await classes();
+
+    const updateInfo = await classCollection.updateOne(
+        {
+            _id: new ObjectId(classId),
+            "reviews._rid": new ObjectId(reviewId)
+        },
+        {
+            $push: { "reviews.$.comments": comment }
+        }
+    );
+
+    if (updateInfo.modifiedCount === 0) {
+        throw new Error("Failed to add comment. Class or review may not exist.");
+    }
+
+    return comment;
 }
