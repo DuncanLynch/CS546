@@ -2,17 +2,6 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { createClass } from './data/classes.js';
 
-function removeHTMLTags(str) {
-    return str.replace(/<[^>]*>/g, '').replace(/\n/g, '').trim();
-}
-
-function extractTypicallyOffered(text) {
-    const semesters = [];
-    if (text.includes("Fall")) semesters.push("Fall Semester");
-    if (text.includes("Spring")) semesters.push("Spring Semester");
-    return semesters.join(" ");
-}
-
 async function parseCourse(link, code) {
     try {
         const response = await axios.get(link);

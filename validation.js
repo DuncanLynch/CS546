@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 
 // Higher-Order Validation function
-export function validate(item_to_validate, type_validation_function, validation_functions) {
+export function validate(item_to_validate, type_validation_function, validation_functions = []) {
     item_to_validate = type_validation_function(item_to_validate);
     for (let func of validation_functions) {
         func(item_to_validate);
@@ -9,31 +9,28 @@ export function validate(item_to_validate, type_validation_function, validation_
     return item_to_validate;
 }
 
-// === Type Validators ===
 export function validate_string(str) {
-    if (!str) throw "Argument not provided!";
-    if (typeof str !== "string") throw "Provided argument is not a string!";
+    if (!str) throw new Error("Argument not provided!");
+    if (typeof str !== "string") throw new Error("Provided argument is not a string!");
     str = str.trim();
-    if (str === "") throw "Provided argument is an empty string!";
+    if (str === "") throw new Error("Provided argument is an empty string!");
     return str;
 }
 
 export function validate_number(num) {
-    if (num === undefined || num === null) throw "Argument not provided!";
-    if (typeof num !== "number") throw "Provided argument is not a number!";
+    if (num === undefined || num === null) throw new Error("Argument not provided!");
+    if (typeof num !== "number") throw new Error("Provided argument is not a number!");
     return num;
 }
 
-// === Utility Validators ===
 export function only_letters(str) {
-    if (!/^[a-zA-Z]+$/.test(str)) throw "Expected only letters!";
+    if (!/^[a-zA-Z]+$/.test(str)) throw new Error("Expected only letters!");
 }
 
 export function only_numbers(str) {
-    if (!/^\d+$/.test(str)) throw "Expected only numbers!";
+    if (!/^\d+$/.test(str)) throw new Error("Expected only numbers!");
 }
 
-// === Processors & Custom Validators ===
 
 // ObjectId Validator
 export const process_id = (id) => {
@@ -54,13 +51,13 @@ export const process_arrayof_ids = (array) => {
 
 // Unsigned Integer
 export const process_unsignedint = (number) => {
-    if (typeof number !== 'number' || number < 0 || !Number.isInteger(number)) throw "Invalid unsigned int!";
+    if (typeof number !== 'number' || number < 0 || !Number.isInteger(number)) throw new Error("Invalid unsigned int!");
     return number;
 };
 
 // Rating: float between 1.0 and 5.0
 export const process_numerical_rating = (rating) => {
-    if (typeof rating !== 'number' || rating < 1.0 || rating > 5.0) throw "Invalid rating!";
+    if (typeof rating !== 'number' || rating < 1.0 || rating > 5.0) throw new Error("Invalid rating!");
     return Number(rating.toFixed(2));
 };
 
@@ -77,7 +74,7 @@ export const validate_professor_name = (name) => {
     name = validate_string(name);
     const parts = name.split(" ");
     if (parts.length !== 2 || !/^[A-Z][a-z]+$/.test(parts[0]) || !/^[A-Z][a-z]+$/.test(parts[1])) {
-        throw "Professor name must be in 'First Last' format with proper casing.";
+        throw new Error("Professor name must be in 'First Last' format with proper casing.");
     }
 };
 
@@ -85,37 +82,40 @@ export const validate_professor_name = (name) => {
 export const validate_stevens_email = (email) => {
     email = validate_string(email);
     const stevensRegex = /^[a-zA-Z0-9._%+-]+@stevens\.edu$/;
-    if (!stevensRegex.test(email)) throw "Email must be a valid stevens.edu address!";
+    if (!stevensRegex.test(email)) throw new Error("Email must be a valid stevens.edu address!");
 };
 
 // Date Format: "MM/DD/YYYY"
 export const validate_mmddyyyy_date = (dateStr) => {
     const regex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/(19|20)\d\d$/;
-    if (!regex.test(dateStr)) throw "Date must be in MM/DD/YYYY format!";
+    if (!regex.test(dateStr)) throw new Error("Date must be in MM/DD/YYYY format!");
 };
 
-// === Field-specific Validators for USER ===
-export function validate_username(username) {
-    validate(username, validate_string, []);
+
+export function validate_prerequisites(prereqString) {
+    const raw = validate_string(prereqString);
+    const parts = raw.split(",").map(s => s.trim());
+    if (parts.some(p => !/^([A-Z]{1,4})\s(\d{3})$/.test(p))) {
+        throw new Error("Each prerequisite must be in 'CS 546' format.");
+    }
+}
+
+export function validate_user_name(user_name) {
+    if (user_name.length === 0 || user_name.length > 25)
+        throw new Error("Username must be between 1 and 25 characters.");
+
+    if (!/^[A-Za-z0-9_]+$/.test(user_name))
+        throw new Error("Username can only contain letters, numbers, and underscores with no spaces.");
+
+    return user_name;
 }
 
 export function validate_password(password) {
-    validate(password, validate_string, []);
-}
+    if (password.length === 0)
+        throw new Error("Password cannot be empty.");
 
-export function validate_user_email(email) {
-    validate(email, validate_string, [validate_stevens_email]);
-}
+    if (!/^[A-Za-z0-9!@#$%^&*()_\-+=\[\]{}|\\:;"'<>,.?/~`]+$/.test(password))
+        throw new Error("Password contains invalid characters.");
 
-// === Field-specific Validators for REVIEW ===
-export function validate_review_title(title) {
-    validate(title, validate_string, []);
-}
-
-export function validate_review_content(content) {
-    validate(content, validate_string, []);
-}
-
-export function validate_review_date(date) {
-    validate(date, validate_string, [validate_mmddyyyy_date]);
+    return password;
 }
