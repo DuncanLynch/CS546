@@ -1,0 +1,27 @@
+<script src="/js/main.js"></script>
+
+<p>Hello {{user_name}}, find your information and reviews below:</p>
+<br>
+<p>Username: {{user_name}}</p>
+<p>Email: {{email}}</p>
+<p>Reviews:</p>
+<ul>
+  {{#each reviews}}
+    <li>
+      <p>Course Code: {{this.course_code}}</p>
+      <p>Professor ID: {{this.professor_id}}</p>
+      <p>Review Title: {{this.review_title}}</p>
+      <p>Reviewer ID: {{this.reviewer_id}}</p>
+      <p>Review Date: {{this.review_date}}</p>
+      <p>Contents: {{this.review_contents}}</p>
+      <p>Likes: {{this.likes}}</p>
+      <p>Dislikes: {{this.dislikes}}</p>
+      <p>Quality Rating: {{this.review_quality_rating}}</p>
+      <p>Difficulty Rating: {{this.review_difficulty_rating}}</p>
+      <p>Total Rating: {{this.review_total_rating}}</p>
+    </li>
+    <br>
+  {{/each}}
+</ul>
+<p>Click <a href="/logout">here</a> to logout.</p>
+<p>Click <a href="/homepage">here</a> to go back to the homepage.</p>

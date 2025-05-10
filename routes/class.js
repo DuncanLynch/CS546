@@ -1,3 +1,4 @@
+
 import express from 'express';
 import * as classData from '../data/classes.js'
 const router = express.Router();
