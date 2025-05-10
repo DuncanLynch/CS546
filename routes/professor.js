@@ -1,6 +1,7 @@
 import express from 'express';
 import * as professorData from '../data/professors.js'
 import * as classData from '../data/classes.js'
+import xss from 'xss'
 const router = express.Router();
 router
 .route('/')
@@ -14,9 +15,9 @@ router
     }
 })
 .post(async (req, res) => {
-        const professor_name = req.body.professor_name
-        const course_id = req.body.course_id
-        const email = req.body.email
+        const professor_name = xss(req.body.professor_name)
+        const course_id = xss(req.body.course_id)
+        const email = xss(req.body.email)
         try {
             console.log({
                 professor_name,
@@ -34,21 +35,22 @@ router
 router
 .route('/:id')
 .get(async (req, res) => {
+    const id = xss(req.params.id)
     try {
-        const foundProfessor = await professorData.getProfessorById(req.params.id)
+        const foundProfessor = await professorData.getProfessorById(id)
         return res.status(200).json(foundProfessor)
     }catch (e) {
-        if(e === "Error: Class not found") return res.status(404).send("404: "+ e) //fix
-        return res.status(500).send("500: " + e)
+        return res.status(404).send("404: "+ e)
     }
 })
 .delete(async (req, res) => {
+    const id = xss(req.params.id)
     try {
-        const deletedProfessor = await professorData.deleteProfessor(req.params.id)
-        
+        const deletedProfessor = await professorData.deleteProfessor(id)
+        //maybe more here depending on next db push
         return res.status(200).json(deletedProfessor)
     }catch (e){
-        return res.status(500).send("500: " + e)
+        return res.status(404).send("404: "+ e)
     }
 })
 export default router

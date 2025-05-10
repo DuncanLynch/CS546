@@ -1,7 +1,8 @@
+
 import express from 'express';
 import * as classData from '../data/classes.js'
 const router = express.Router();
-
+import xss from 'xss'
 router
 .route('/')
 .get(async (req, res) => {
@@ -14,14 +15,14 @@ router
     }
 })
 .post(async (req, res) => {
-    const course_code = req.body.course_code
-    const course_name = req.body.course_name
-    const course_description = req.body.course_description
-    const typically_offered = req.body.typically_offered
-    const prerequisites = req.body.prerequisites
-    const class_total_rating = req.body.class_total_rating
-    const class_total_difficulty = req.body.class_total_difficulty
-    const class_total_quality = req.body.class_total_quality
+    const course_code = xss(req.body.course_code)
+    const course_name = xss(req.body.course_name)
+    const course_description = xss(req.body.course_description)
+    const typically_offered = xss(req.body.typically_offered)
+    const prerequisites = xss(req.body.prerequisites)
+    const class_total_rating = xss(req.body.class_total_rating)
+    const class_total_difficulty = xss(req.body.class_total_difficulty)
+    const class_total_quality = xss(req.body.class_total_quality)
     try {
         const newClass = await classData.createClass(course_code, course_name, course_description, typically_offered, prerequisites, class_total_rating, class_total_difficulty, class_total_quality)
         return res.status(200).json(newClass);
@@ -33,27 +34,29 @@ router
 router
 .route('/:id')
 .get(async (req, res) => {
+    const id = xss(req.params.id)
     try {
-        const foundClass = await classData.getClassById(req.params.id)
+        const foundClass = await classData.getClassById(id)
         return res.status(200).json(foundClass)
     }catch (e) {
-        if(e === "Error: Class not found") return res.status(404).send("404: "+ e) //fix
-        return res.status(500).send("500: " + e)
+        return res.status(404).send("404: "+ e)
     }
 })
 .delete(async (req, res) => {
+    const id = xss(req.params.id)
     try {
-        const deletedClass = await classData.deleteClass(req.params.id)
+        const deletedClass = await classData.deleteClass(id)
         return res.status(200).json(deletedClass)
     }catch (e){
-        return res.status(500).send("500: " + e)
+        return res.status(404).send("404: "+ e)
     }
 })
 router
 .route('/:course_code')
 .get(async (req, res) => {
     try{
-        //const foundClass = await classData.getClassByCourseCode(req.params.id) commented until getclassbycoursecode is made
+        const course_code = xss(req.params.id)
+        //const foundClass = await classData.getClassByCourseCode(course_code) commented until getclassbycoursecode is made
 
         //CHANGE THE VALUES OF THIS OBJECT BELOW HOW YOU LIKE, IF YOU NEED MORE DATA PASSED INTO YOUR COURSE PAGE JUST ASK ME, FOR NOW I AM JUST PASSING A COURSE OBJECT
         //THIS TEST OBJECT DOES NOT HAVE A _id PARAMETER, IN THE REAL DEAL IT WILL HAVE ONE, FOR NOW JUST PRETEND LIKE IT HAS ONE
@@ -72,8 +75,7 @@ router
         //CHANGE CLASSPAGE TO THE NAME OF THE CLASS PAGE HANDLEBARS FILE
         return res.status(200).render('classpage', {class: foundClass})
     }catch (e){
-        //if(e === "Class not found") return res.status(404).send("404: "+ e)
-        return res.status(500).send("500: " + e)
+        return res.status(404).send("404: "+ e)
     }
     
 })
