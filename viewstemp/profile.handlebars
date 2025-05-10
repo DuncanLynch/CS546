@@ -1,0 +1,9 @@
+<h2>Your Profile</h2>
+<h3>Your Reviews</h3>
+<ul>
+  {{#each reviews}}<li>{{this.course}} - {{this.professor}}: {{this.text}}</li>{{/each}}
+</ul>
+<h3>Your Starred Professors</h3>
+<ul>
+  {{#each starred}}<li>{{this.name}}</li>{{/each}}
+</ul>
