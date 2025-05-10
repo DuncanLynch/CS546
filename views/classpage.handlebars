@@ -2,11 +2,11 @@
 
 <p>Idea: Display all info regarding class found</p>
 
-<h2>Course Found! {{course_code}}: {{course_name}}</h2>
-<br>
-<p>PreRequisites: {{prerequisites}}</p>
+<h2>{{course_code}} {{course_name}}</h2>
 <br>
 <p>Course Description: {{course_description}}</p>
+<br>
+<p>PreRequisites: {{prerequisites}}</p>
 <br>
 <p>Semester(s) Offered: {{course_instructor}}</p>
 <br>
@@ -19,7 +19,7 @@
 <p>Overall Difficulty: {{class_total_difficulty}}</p>
 <br>
 <p>Reviews:</p>
-<ul>
+<ul id="classlist">
   {{#each reviews}}
     <li>
       <p>Title: {{review_title}}</p>
@@ -27,3 +27,4 @@
       <p>Review: {{this.review}}</p>
     </li>
   {{/each}}
+</ul>
