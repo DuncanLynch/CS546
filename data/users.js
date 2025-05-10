@@ -76,7 +76,7 @@ export async function validateUser(user_name, password) {
     const match = await bcrypt.compare(password, user.hashed_password);
     if (!match) throw new Error("Invalid username or password.");
 
-    return { _id: user._id, user_name: user.user_name, email: user.email };
+    return { _id: user._id, user_name: user.user_name, email: user.email, reviews: user.reviews };
 }
 
 

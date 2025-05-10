@@ -1,0 +1,114 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f6f9;
+    color: #333;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+a,
+button {
+    display: inline-block;
+    background-color: #3d0d01;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+a:hover,
+button:hover {
+    background-color: #1b0601;
+}
+
+footer {
+    margin-top: 40px;
+    text-align: center;
+    padding: 20px 0;
+    background-color: #3d0d01;
+    color: white;
+    font-size: 14px;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+li {
+    background: #e9ecef;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+form input,
+form textarea {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
+
+.success {
+    color: green;
+    font-weight: bold;
+}
+
+.top-bar {
+    background-color: #3d0d01;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between; /* Aligns items to the edges */
+    align-items: center;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.top-bar h1 {
+    color: white;
+    margin: 0;
+    flex-grow: 1; /* This allows the h1 to take the remaining space and center it */
+    text-align: center;
+}
+
+.top-bar a {
+    margin-left: 20px;
+    text-align: right;
+}

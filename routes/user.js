@@ -2,6 +2,7 @@ import express from 'express';
 import * as userData from '../data/users.js'
 import xss from 'xss';
 import crypto from 'crypto';
+import { ObjectId } from 'mongodb';
 const router = express.Router();
 const pendingUsers = new Map();
 
@@ -9,31 +10,10 @@ router
 .route('/')
 .get(async (req, res) => {
     try {
-        const userList = await userData.getAllClasses()
-        return res.status(200).json(userList);
+        return res.status(404).json({error: "Page not found!"});
     } catch (e) {
         // Something went wrong with the server!
         return res.status(500).send("500: " + e);
-    }
-})
-router
-.route('/:user_name')
-.get(async (req, res) => {
-    const user_name = xss(req.params.user_name)
-    try {
-        const foundUser = await userData.getUserByName(user_name)
-        return res.status(200).json(foundUser)
-    }catch (e) {
-        return res.status(404).send("404: "+ e)
-    }    
-})
-.delete(async (req, res) => {
-    const user_name = xss(req.params.user_name)
-    try {
-        const deletedUser = await userData.deleteUser(user_name)
-        return res.status(200).json(deletedUser)
-    }catch (e){
-        return res.status(404).send("404: "+ e)
     }
 })
 router
@@ -47,20 +27,22 @@ router
 })
 .post(async (req, res) => {
     try{
-        user_name = xss(req.body.user_name)
-        password = xss(req.body.password)
-        const loginUser = await userData.validateUser(user_name, password) //assuming return value of validate user is the user object
+        const user_name = xss(req.body.user_name);
+        const password = xss(req.body.password);
+        const loginUser = await userData.validateUser(user_name, password); //assuming return value of validate user is the user object
+        console.log(loginUser);
         req.session.user = {
             user_name: loginUser.user_name, 
-            password: loginUser.encrypted_password, 
+            _id: loginUser._id.toString(), 
             email: loginUser.email, 
-            reviews: loginUser.reviews}
+            reviews: loginUser.reviews
+        }
 
 
         //2fa here later
 
-        //return res.status(200).redirect('/profile') uncomment me once a profile handlebars exists
-        return res.status(200).send(loginUser)
+        return res.status(200).redirect('/user/profile');
+        //return res.status(200).send(loginUser)
     }catch(e){
         return res.status(500).render("500: " + e) //update error
     }
@@ -76,7 +58,7 @@ router.route('/register')
     const email = xss(req.body.email);
 
     try {
-      const verificationCode = crypto.randomInt(100000, 999999).toString();
+      /* const verificationCode = crypto.randomInt(100000, 999999).toString();
       
       // store temporarily
       pendingUsers.set(email, {
@@ -94,7 +76,10 @@ router.route('/register')
         text: `Hi ${user_name}, your verification code is: ${verificationCode}`
       });
 
-      return res.status(200).render('verify', { email }); // Render form to input the code
+      return res.status(200).render('verify', { email }); // Render form to input the code */
+
+      const newUser = await userData.createUser(user_name, password, email);
+      return res.status(200).render('login');
     } catch (e) {
       return res.status(500).send("500: " + e);
     }
@@ -125,7 +110,7 @@ router
 .route('/profile')
 .get(async (req, res) => {
     try{
-        return res.status(200).render('profile', {user:req.session.user}) //change to profile handlebars
+        return res.status(200).render('profile', {user_name: req.session.user.user_name, email: req.session.user.email, reviews: req.session.user.reviews}) //change to profile handlebars
     }catch(e){
         return res.status(500).send("500: " + e)
     }
@@ -140,5 +125,26 @@ router
         res.status(400).json({ error: 'Internal Server Error' });
       }
 });
+
+router
+.route('/:user_name')
+.get(async (req, res) => {
+    const user_name = xss(req.params.user_name)
+    try {
+        const foundUser = await userData.getUserByName(user_name)
+        return res.status(200).json(foundUser)
+    }catch (e) {
+        return res.status(404).send("404: "+ e)
+    }    
+})
+.delete(async (req, res) => {
+    const user_name = xss(req.params.user_name)
+    try {
+        const deletedUser = await userData.deleteUser(user_name)
+        return res.status(200).json(deletedUser)
+    }catch (e){
+        return res.status(404).send("404: "+ e)
+    }
+})
 
 export default router

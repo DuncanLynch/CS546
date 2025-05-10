@@ -4,7 +4,7 @@
 <br>
 <p>Username: {{user_name}}</p>
 <p>Email: {{email}}</p>
-<p>Reviews:</p>
+{{#if reviews}}<p>Reviews:</p>{{/if}}
 <ul>
   {{#each reviews}}
     <li>
@@ -23,5 +23,5 @@
     <br>
   {{/each}}
 </ul>
-<p>Click <a href="/logout">here</a> to logout.</p>
-<p>Click <a href="/homepage">here</a> to go back to the homepage.</p>
+<p>Click <a href="/user/signout">here</a> to logout.</p>
+<p>Click <a href="/">here</a> to go back to the homepage.</p>
