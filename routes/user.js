@@ -49,7 +49,11 @@ router
         user_name = xss(req.body.user_name)
         password = xss(req.body.password)
         const loginUser = await userData.validateUser(user_name, password) //assuming return value of validate user is the user object
-        req.session.user = {user_name: loginUser.user_name, password: loginUser.encrypted_password, email: loginUser.email, reviews: loginUser.reviews}
+        req.session.user = {
+            user_name: loginUser.user_name, 
+            password: loginUser.encrypted_password, 
+            email: loginUser.email, 
+            reviews: loginUser.reviews}
 
 
         //2fa here later
@@ -94,4 +98,15 @@ router
         return res.status(500).send("500: " + e)
     }
 })
+router
+.route('/signout')
+.get(async (req, res) => {
+    try{
+        req.session.destroy();
+        res.render('signout');
+      }catch(e){
+        res.status(400).json({ error: 'Internal Server Error' });
+      }
+});
+
 export default router

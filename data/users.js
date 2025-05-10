@@ -136,4 +136,3 @@ export async function deleteReview(class_id, reviewer_id, review_date) {
     updatedClass._id = updatedClass._id.toString();
     return updatedClass;
 }
-
