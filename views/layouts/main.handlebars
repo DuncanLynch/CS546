@@ -1,0 +1,27 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="/css/sitestyles.css">
+  <script defer src="/js/form_validate.js"></script>
+</head>
+<body>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/courses">Courses</a>
+    {{#if authenticated}}
+      <a href="/profile">Profile</a>
+      <a href="/logout">Logout</a>
+      {{#if isAdmin}}
+        <a href="/admin">Admin</a>
+      {{/if}}
+    {{else}}
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    {{/if}}
+  </nav>
+  {{{body}}}
+</body>
+</html>
+
+{{! comment test change}}
