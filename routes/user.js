@@ -1,8 +1,9 @@
 import express from 'express';
 import * as userData from '../data/users.js'
 import xss from 'xss';
+import crypto from 'crypto';
 const router = express.Router();
-
+const pendingUsers = new Map();
 
 router
 .route('/')
@@ -61,30 +62,61 @@ router
     }
 
 })
-router
-.route('/register')
-.get(async (req, res) => {
-    try{
-        return res.status(200).render('register') //change if register handlebars is diff 
-    }catch(e){
-        return res.status(500).render("500: " + e)
-    }
-})
-.post(async (req, res) => {
-    const user_name = xss(req.body.user_name)
-    const password = xss(req.body.password)
-    const email = xss(req.body.email)
-    try{
-        const newUser = await userData.createUser(user_name, password, email)
-        //return res.status(200).redirect('/login') //uncomment me once a login page exists!
 
-        //maybe think about email here
-        return res.status(200).send(newUser)
-    }catch (e){
-        return res.status(500).send("500: "+ e)
+
+router.route('/register')
+  .get((req, res) => res.status(200).render('register'))
+  .post(async (req, res) => {
+    const user_name = xss(req.body.user_name);
+    const password = xss(req.body.password);
+    const email = xss(req.body.email);
+
+    try {
+      const verificationCode = crypto.randomInt(100000, 999999).toString();
+      
+      // store temporarily
+      pendingUsers.set(email, {
+        user_name,
+        password,
+        code: verificationCode,
+        timestamp: Date.now()
+      });
+
+      // send email
+      await transporter.sendMail({
+        from: '"Trivia Game" <hypaplayz@gmail.com>',
+        to: email,
+        subject: 'Your verification code',
+        text: `Hi ${user_name}, your verification code is: ${verificationCode}`
+      });
+
+      return res.status(200).render('verify', { email }); // Render form to input the code
+    } catch (e) {
+      return res.status(500).send("500: " + e);
+    }
+});
+router.route('/verify')
+  .post(async (req, res) => {
+    const email = xss(req.body.email);
+    const codeEntered = xss(req.body.code);
+
+    const pending = pendingUsers.get(email);
+    if (!pending) return res.status(400).send('No pending registration for this email.');
+
+    if (pending.code !== codeEntered) {
+      return res.status(400).send('Invalid verification code.');
     }
 
-})
+    try {
+      const created = await userData.createUser(pending.user_name, pending.password, email);
+      pendingUsers.delete(email); // clean up
+
+      return res.status(200).send('Registration complete! You can now log in.');
+    } catch (e) {
+      return res.status(500).send("500: " + e);
+    }
+});
+
 router
 .route('/profile')
 .get(async (req, res) => {
