@@ -98,7 +98,6 @@ router
         return res.status(500).send("500: " + e)
     }
 })
-
 router
 .route('/signout')
 .get(async (req, res) => {

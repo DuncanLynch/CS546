@@ -72,7 +72,6 @@ router
             professors: [],
             reviews: []
         }
-
         //CHANGE CLASSPAGE TO THE NAME OF THE CLASS PAGE HANDLEBARS FILE
         return res.status(200).render('classpage', {class: foundClass})
     }catch (e){
