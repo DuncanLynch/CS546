@@ -95,7 +95,7 @@ form label {
     background-color: #3d0d01;
     padding: 15px 20px;
     display: flex;
-    justify-content: space-between; /* Aligns items to the edges */
+    justify-content: space-between; 
     align-items: center;
     border-radius: 8px;
     margin-bottom: 30px;
@@ -104,7 +104,7 @@ form label {
 .top-bar h1 {
     color: white;
     margin: 0;
-    flex-grow: 1; /* This allows the h1 to take the remaining space and center it */
+    flex-grow: 1; 
     text-align: center;
 }
 
