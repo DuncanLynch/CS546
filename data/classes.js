@@ -78,7 +78,7 @@ export async function deleteClass(id) {
     return true;
 }
 
-export async function addReview(class_id, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, likes, dislikes, review_quality_rating, review_difficulty_rating, review_total_rating, _rid, reviewer_name) {
+export async function addReview(class_id, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, _rid, reviewer_name) {
     validate(class_id, validate_string, [process_id]);
     validate(reviewer_id, validate_string, [process_id]);
     validate(professor_id, validate_string, [process_id]);
@@ -88,8 +88,6 @@ export async function addReview(class_id, course_code, professor_id, review_titl
     validate(review_title, validate_string, []);
     validate(review_date, validate_string, [validate_mmddyyyy_date]);
     validate(review_contents, validate_string, []);
-    validate(likes, validate_number, [process_unsignedint]);
-    validate(dislikes, validate_number, [process_unsignedint]);
     validate(review_quality_rating, validate_number, [process_numerical_rating]);
     validate(review_difficulty_rating, validate_number, [process_numerical_rating]);
     validate(review_total_rating, validate_number, [process_numerical_rating]);
@@ -116,8 +114,8 @@ export async function addReview(class_id, course_code, professor_id, review_titl
                     reviewer_name,
                     review_date,
                     review_contents,
-                    likes,
-                    dislikes,
+                    likes: 0,
+                    dislikes: 0,
                     review_quality_rating,
                     review_difficulty_rating,
                     review_total_rating,

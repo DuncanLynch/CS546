@@ -55,7 +55,7 @@ export async function deleteUser(user_name) {
 }
 
 export async function addReview(user_name, review_object) {
-    validate(user_name, validate_string, [validate_username]);
+    validate(user_name, validate_string, [validate_user_name]);
 
     const userCollection = await users();
     const result = await userCollection.updateOne(
@@ -72,8 +72,10 @@ export async function validateUser(user_name, password) {
     const userCollection = await users();
     const user = await userCollection.findOne({ user_name });
     if (!user) throw new Error("Invalid username or password.");
-
+    console.log("user: " + user)
+    //console.log("match: " + match)
     const match = await bcrypt.compare(password, user.hashed_password);
+
     if (!match) throw new Error("Invalid username or password.");
 
     return { _id: user._id, user_name: user.user_name, email: user.email, reviews: user.reviews };
