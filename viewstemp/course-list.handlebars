@@ -1,7 +1,0 @@
-<h2>Courses</h2>
-<input type="text" id="searchInput" placeholder="Search by professor">
-<ul id="courseList">
-  {{#each courses}}
-    <li><a href="/courses/{{this._id}}">{{this.name}}</a> ({{this.reviewCount}} reviews)</li>
-  {{/each}}
-</ul>
