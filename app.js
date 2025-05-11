@@ -2,42 +2,8 @@ import express from 'express';
 const app = express();
 import configRoutes from './routes/index.js';
 import exphbs from 'express-handlebars';
-import { login, signout } from './middleware.js';
+import * as middleware from './middleware.js';
 import session from 'express-session';
-
-const rewriteUnsupportedBrowserMethods = (req, res, next) => {
-  if (req.body && req.body._method) {
-    req.method = req.body._method;
-    delete req.body._method;
-  }
-  next();
-};
-
-// Middleware and Static Files
-app.use('/public', express.static('public'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(rewriteUnsupportedBrowserMethods);
-
-// Set up Handlebars engine with layout directory
-app.engine('handlebars', exphbs.engine({defaultLayout: 'main'}));
-app.set('view engine', 'handlebars');
-
-// Middleware for login and signout routes
-app.use('/login', (req, res, next) => {
-  if (req.method === 'GET') {
-    return login(req, res, next);
-  }
-  next();
-});
-
-app.use('/signout', (req, res, next) => {
-  if (req.method === 'GET') {
-    return signout(req, res, next);
-  }
-  next();
-});
-
 // Session configuration
 app.use(
   session({
@@ -48,6 +14,63 @@ app.use(
     cookie: { maxAge: 60000 }
   })
 );
+const rewriteUnsupportedBrowserMethods = (req, res, next) => {
+  if (req.body && req.body._method) {
+    req.method = req.body._method;
+    delete req.body._method;
+  }
+  next();
+};
+// Middleware
+app.use('/class', (req, res, next) => {
+  if(req.method === 'POST') return middleware.loggedin(req, res, next, '/') //unsure about redirect may need further altering
+  next();
+})
+app.use('/class/:id', (req, res, next) => {
+  if(req.method === 'DELETE') return middleware.noaccess(req, res, next, '/')
+  next();
+})
+//
+app.use('/professor', (req, res, next) => {
+  if(req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login')
+  next();
+})
+app.use('/professor/:id', (req, res, next) => {
+  if(req.method === 'DELETE') return middleware.noaccess(req, res, next, '/')
+  next();
+})
+app.use('/user/:user_name', (req, res, next) => {
+  if(req.method === 'DELETE') return middleware.noaccess(req, res, next, '/')
+  next();
+})
+app.use('/user/login', (req, res, next) => {
+  if(req.method === 'GET' || req.method === 'POST') return middleware.notloggedin(req, res, next, '/user/profile');
+  next();
+});
+app.use('/user/login', (req, res, next) => {
+  if(req.method === 'GET' || req.method === 'POST') return middleware.notloggedin(req, res, next, '/user/profile');
+  next();
+});
+app.use('/user/signout', (req, res, next) => {
+  if (req.method === 'GET') return middleware.loggedin(req, res, next, '/user/login');
+  next();
+});
+app.use('/user/profile', (req, res, next) => {
+  if(req.method === 'GET' || req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login');
+  next();
+});
+// Middleware and Static Files
+app.use('/public', express.static('public'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(rewriteUnsupportedBrowserMethods);
+
+// Set up Handlebars engine with layout directory
+app.engine('handlebars', exphbs.engine({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
+
+
+
 
 // Import and configure routes
 configRoutes(app);

@@ -23,7 +23,7 @@ router
 .post(async (req, res) => {
     let user_name, password = null;
     try{
-      if (!req.body || !(Object.keys(req.body).length === 2)) {
+      if (!req.body || !(Object.keys(req.body).length === 3)) {
         return res.status(400).send("400: Invalid length of json");
       }
     }catch(e){
@@ -72,8 +72,9 @@ router.route('/register')
 )
   .post(async (req, res) => {
     let user_name, password, email = null;
+    console.log(req.body)
     try{
-      if (!req.body || !(Object.keys(req.body).length === 3)) {
+      if (!req.body || !(Object.keys(req.body).length === 4)) {
         return res.status(400).send("400: Invalid length of json");
       }
     }catch(e){
