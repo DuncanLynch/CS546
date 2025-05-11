@@ -2,69 +2,40 @@ import express from 'express';
 import * as professorData from '../data/professors.js'
 import * as classData from '../data/classes.js'
 import xss from 'xss'
-import { validate_stevens_email, validate_professor_name, process_id, validate, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_mmddyyyy_date, validate_number, validate_user_name, validate_prerequisites} from "../validation.js";
 const router = express.Router();
 router
 .route('/')
 .get(async (req, res) => {
-    try{
-        if (!(Object.keys(req.body).length === 0)) {
-            return res.status(400).send("400: Route was not expecting json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
     try {
-        const professorList = await professorData.getAllProfessors()
-        return res.status(200).json(professorList);
+        const professorData = await professorData.getAllClasses()
+        return res.status(200).json(professorData);
     } catch (e) {
         // Something went wrong with the server!
         return res.status(500).send("500: " + e);
     }
 })
 .post(async (req, res) => {
-    let professor_name, course_id, email = null;
-    try{
-        if (!req.body || !(Object.keys(req.body).length === 3)) {
-            return res.status(400).send("400: Invalid length of json");
+        const professor_name = xss(req.body.professor_name)
+        const course_id = xss(req.body.course_id)
+        const email = xss(req.body.email)
+        try {
+            console.log({
+                professor_name,
+                course_id,
+                email
+            })
+            const newProfessor = await professorData.createProfessor(professor_name, course_id, email)
+            await classData.addProfessor(course_id, newProfessor._id)
+            return res.status(200).json(newProfessor);
+        } catch (e) {
+            // Something went wrong with the server!
+            return res.status(500).send("500: " + e);
         }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        professor_name = validate(xss(req.body.professor_name), validate_string, [validate_professor_name])
-        course_id = validate(xss(req.body.course_id), validate_string, [process_id])
-        email = validate(xss(req.body.email), validate_string, [validate_stevens_email])
-    }catch(e){
-        return res.status(400).send("400: " + e);
-    }
-    if(professor_name === null || course_id === null || email === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    try {
-        const newProfessor = await professorData.createProfessor(professor_name, course_id, email)
-        await classData.addProfessor(course_id, newProfessor._id)
-        return res.status(200).json(newProfessor);
-    } catch (e) {
-        // Something went wrong with the server!
-        return res.status(500).send("500: " + e);
-    }
 })
 router
 .route('/:id')
 .get(async (req, res) => {
-    let id = null;
-    try{
-        if (!(Object.keys(req.body).length === 0)) {
-            return res.status(400).send("400: Route was not expecting json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        id = validate(xss(req.params.id), validate_string, [process_id])
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if(id === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    const id = xss(req.params.id)
     try {
         const foundProfessor = await professorData.getProfessorById(id)
         return res.status(200).json(foundProfessor)
@@ -73,20 +44,7 @@ router
     }
 })
 .delete(async (req, res) => {
-    let id = null;
-    try{
-        if (!(Object.keys(req.body).length === 0)) {
-            return res.status(400).send("400: Route was not expecting json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        id = validate(xss(req.params.id), validate_string, [process_id])
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if(id === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    const id = xss(req.params.id)
     try {
         const deletedProfessor = await professorData.deleteProfessor(id)
         //maybe more here depending on next db push

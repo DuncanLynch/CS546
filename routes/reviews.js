@@ -1,27 +1,12 @@
 import express from 'express';
 import * as classData from '../data/classes.js'
 import * as userData from '../data/users.js'
-import xss from 'xss';
-import { process_id, validate, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_mmddyyyy_date, validate_number, validate_user_name, validate_prerequisites} from "../validation.js";
 const router = express.Router();
 
 router
 .route('/review/:id')
 .get(async (req, res) => {
-    let id = null;
-    try{
-        if (!(Object.keys(req.body).length === 0)) {
-            return res.status(400).send("400: Route was not expecting json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        id = validate(xss(req.params.id), validate_string, [process_id])
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if (id === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    const id = xss(req.params.id)
     try{
         const classList = await classData.getAllClasses()
         for(let i = 0; i<classList.length; i++){
@@ -35,23 +20,10 @@ router
     }
 })
 .delete(async (req, res) => {
-    let id = null;
+    const id = xss(req.params.id)
     try{
-        if (!(Object.keys(req.body).length === 0)) {
-            return res.status(400).send("400: Route was not expecting json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        id = validate(xss(req.params.id), validate_string, [process_id])
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if (id === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    try{
-        const deletedReview = await classData.deleteReview(id)
-        await userData.deleteReview(id)
+        const deletedReview = await classData.deleteReview(id) //waiting on this function
+        await userData.deleteReview(id) //waiting on this function
         return res.status(200).send(deletedReview)
     }catch(e){
         return res.status(404).send("404: " + e)
@@ -59,31 +31,18 @@ router
 
 })
 .put(async (req, res) => {
-    let id, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, likes, dislikes, review_quality_rating, review_difficulty_rating, review_total_rating = null
-    try{
-        if (!req.body || !(Object.keys(req.body).length === 11)) {
-            return res.status(400).send("400: Invalid length of json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        id = validate(xss(req.params.id), validate_string, [process_id])
-        course_code = validate(xss(req.body.course_code), validate_string, [process_course_code])
-        professor_id = validate(xss(req.body.professor_id), validate_string, [process_id])
-        review_title = validate(xss(req.body.review_title), validate_string, [])
-        reviewer_id = validate(xss(req.body.reviewer_id), validate_string, [process_id]);
-        review_date = validate(xss(req.body.review_date), validate_string, [validate_mmddyyyy_date])
-        review_contents = validate(xss(req.body.review_contents), validate_string, [])
-        likes = validate(xss(req.body.likes), validate_number, [process_unsignedint]);
-        dislikes = validate(xss(req.body.dislikes), validate_number, [process_unsignedint]);
-        review_quality_rating = validate(xss(req.bodyreview_quality_rating), validate_number, [process_numerical_rating])
-        review_difficulty_rating = validate(xss(req.body.review_difficulty_rating), validate_number, [process_numerical_rating])
-        review_total_rating = validate(xss(req.body.review_total_rating), validate_number, [process_numerical_rating]);
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if(id === null || course_code === null || professor_id === null || review_title === null || reviewer_id === null || review_date === null || review_contents === null || likes === null || dislikes === null || review_quality_rating === null || review_difficulty_rating === null || review_total_rating === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    const id = xss(req.params.id)
+    const course_code = xss(req.body.course_code)
+    const professor_id = xss(req.body.professor_id)
+    const review_title = xss(req.body.review_title)
+    const reviewer_id = xss(req.body.reviewer_id)
+    const review_date = xss(req.body.review_date)
+    const review_contents = xss(req.body.review_contents)
+    const likes = xss(req.body.likes)
+    const dislikes = xss(req.body.dislikes)
+    const review_quality_rating = xss(req.bodyreview_quality_rating)
+    const review_difficulty_rating = xss(req.body.review_difficulty_rating)
+    const review_total_rating = xss(req.body.review_total_rating)
     try{
         const updatedReview = await classData.updateReview(id, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, likes, dislikes, review_quality_rating, review_difficulty_rating, review_total_rating)//waiting on this function
         return res.status(200).send(updatedReview)
@@ -92,113 +51,9 @@ router
     }
 })
 router
-.route('/review/:id/comments')
-.post(async (req, res) => {
-    let reviewId, classId, userId, comment_contents = null;
-    try{
-        if (!req.body || !(Object.keys(req.body).length === 3)) {
-            return res.status(400).send("400: Invalid length of json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        reviewId = validate(xss(req.params.id), validate_string, [process_id])
-        classId = validate(xss(req.body.classId), validate_string, [process_id])
-        userId = validate(xss(req.body.userId), validate_string, [process_id])
-        comment_contents = validate(xss(req.body.comment_contents), validate_string, []) //find specific validation function
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if(reviewId === null || classId === null || userId === null || comment_contents === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    try{
-        const newComment = await classData.addComment(classId, reviewId, userId, comment_contents)
-        return res.status(200).send(newComment)
-    }catch (e){
-        return res.status(404).send("404: " + e)
-    }
-})
-.get(async (req, res) => {
-    let id = null;
-    try{
-        if (!(Object.keys(req.body).length === 0)) {
-            return res.status(400).send("400: Route was not expecting json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        id = validate(xss(req.params.id), validate_string, [process_id])
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if (id === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    try{
-        const classList = await classData.getAllClasses()
-        for(let i = 0; i<classList.length; i++){
-            for(let j = 0; j<classList[i].reviews.length; j++){
-                if(classList[i].reviews[j]._id == id) return res.status(200).send(classList[i].reviews[j].comments)
-            }
-        }
-        return res.status(404).send("404: Review not found so can't return comments")
-    }catch{
-        return res.status(500).send("500: " + e)
-    }
-
-})
-router
-.route('/review/:reviewId/comments/:commentId')
-.get(async (req, res) => {
-    let id, commentId = null;
-    try{
-        if (!(Object.keys(req.body).length === 0)) {
-            return res.status(400).send("400: Route was not expecting json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        id = validate(xss(req.params.reviewId), validate_string, [process_id])
-        commentId = validate(xss(req.params.commentId), validate_string, [process_id])
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if (id === null || commentId === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    let reviewobj = null;
-    try{
-        const classList = await classData.getAllClasses()
-        for(let i = 0; i<classList.length; i++){
-            for(let j = 0; j<classList[i].reviews.length; j++){
-                if(classList[i].reviews[j]._id == id) reviewobj = classList[i].reviews[j]._id
-            }
-        }
-        if(reviewobj === null) return res.status(404).send("404: Review not found so can't return comments")
-        for(let i = 0; i<reviewobj.comments.length; i++){
-            if(reviewobj.comments[i]._id === commentId) return res.status(200).send(reviewobj.commentId)
-        }
-        return res.status(404).send("404: Comment not found inside review")
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-})
-
-router
 .route('/:classId')
 .get(async (req, res) => {
-    let classId = null;
-    try{
-        if (!(Object.keys(req.body).length === 0)) {
-            return res.status(400).send("400: Route was not expecting json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        classId = validate(xss(req.params.id), validate_string, [process_id])
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if (classId === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    const classId = xss(req.params.id)
     try {
         const reviews = await classData.getClassById(classId).reviews
         return res.status(200).json(reviews);
@@ -208,34 +63,22 @@ router
     }
 })
 .post(async (req, res) => {
-    let classId, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name = null
+    const classId = xss(req.params.id)
+    const course_code = xss(req.body.course_code)
+    const professor_id = xss(req.body.professor_id)
+    const review_title = xss(req.body.review_title)
+    const reviewer_id = xss(req.body.reviewer_id)
+    const review_date = xss(req.body.review_date) 
+    const review_contents = xss(req.body.review_contents) 
+    const review_quality_rating = xss(req.body.review_quality_rating)
+    const review_difficulty_rating = xss(req.body.review_difficulty_rating)
+    const review_total_rating = xss(req.body.review_total_rating)
+    const user_name = xss(req.session.user_name)
     try{
-        if (!req.body || !(Object.keys(req.body).length === 10)) {
-            return res.status(400).send("400: Invalid length of json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{//change reviewid and username to session after test
-        classId = validate(xss(req.params.classId), validate_string, [process_id])
-        course_code = validate(xss(req.body.course_code), validate_string, [process_course_code])
-        professor_id = validate(xss(req.body.professor_id), validate_string, [process_id])
-        review_title = validate(xss(req.body.review_title), validate_string, []); //find specific validation function
-        reviewer_id = validate(xss(req.body.reviewer_id), validate_string, [process_id])
-        review_date = validate(xss(req.body.review_date), validate_string, [validate_mmddyyyy_date]);
-        review_contents = validate(xss(req.body.review_contents), validate_string, [])
-        review_quality_rating = validate( Number(xss(req.body.review_quality_rating.toString())) , validate_number, [process_numerical_rating])
-        review_difficulty_rating = validate( Number(xss(req.body.review_difficulty_rating.toString())) , validate_number, [process_numerical_rating])
-        review_total_rating = validate( Number(xss(req.body.review_total_rating.toString())) , validate_number, [process_numerical_rating])
-        user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if (classId === null || course_code === null || professor_id === null || review_title === null || reviewer_id === null || review_date === null || review_contents === null || review_quality_rating === null || review_difficulty_rating === null || review_total_rating === null || user_name === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    try{
-        const newReview = await classData.addReview(classId, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name)
+        const newReview = await classData.addReview(classId, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating)
         await userData.addReview(user_name, newReview) //awaiting on this function, update param upon duncan push
         return res.status(200).send(newReview)
+
     }catch(e){
         return res.status(404).send(e);
     }

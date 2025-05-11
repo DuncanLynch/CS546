@@ -34,9 +34,9 @@ export function only_numbers(str) {
 
 // ObjectId Validator
 export const process_id = (id) => {
-    if (!id || typeof id !== 'string' || id.trim().length === 0) throw new Error("Empty string!");
+    if (!id || typeof id !== 'string' || id.trim().length === 0) return false;
     id = id.trim();
-    if (!ObjectId.isValid(id)) throw new Error("Input is not an ID!");
+    if (!ObjectId.isValid(id)) return false;
     return id;
 };
 

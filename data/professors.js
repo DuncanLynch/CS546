@@ -47,7 +47,6 @@ export async function getProfessorById(id) {
     const professorCollection = await profs();
     const _id = new ObjectId(id);
     let info = await professorCollection.findOne(_id);
-    if (!info) throw new Error("Professor not found");
     info._id = id;
     return info;
 }
