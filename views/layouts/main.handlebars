@@ -4,30 +4,34 @@
   <meta charset="UTF-8">
   <title>RateMyClassy</title>
   <link rel="stylesheet" href="/public/css/main.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="/public/js/form_validate.js" defer></script>
 </head>
-
 <body>
-  <div class="top-bar">
-    <h1>Rate My Classy</h1>
-    {{#if user}}
-    <a href ="/user/profile">View Profile</a>
-    <a href="/user/signout">Logout</a>
-    {{else}}
-    <a href ="/user/register">Register</a>
-    <a href="/user/login">Sign In</a>
-    {{/if}}
+  <div class="layout">
+    <div class="sidebar"> 
+      <div>
+        <h1>Rate My Classy</h1>
+        <nav>
+          <a href="/">Home</a>
+          {{#if user_logged }}
+          <a href ="/user/profile">View Profile</a>
+          <a href="/user/signout">Logout</a>
+          {{else}}
+          <a href ="/user/register">Register</a>
+          <a href="/user/login">Sign In</a>
+          {{/if}}
+        </nav>
+      </div>
+      <div class="names">Authors<div class="horizontal"></div>Duncan Lynch<br>Alan Manjarrez<br>Gabirel Castillo<br>Lewis Goldenberg</div>
+    </div>
+
+    <div class="main-content">
+      {{{body}}}
+    </div>
   </div>
-  
-
-
-
-  {{{body}}}
-
 </body>
 
-<footer>
-  <p>Authors</p>
-</footer>
 
 </html>
+

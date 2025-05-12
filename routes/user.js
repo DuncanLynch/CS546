@@ -3,19 +3,24 @@ import * as userData from '../data/users.js'
 import xss from 'xss';
 import crypto from 'crypto';
 import { ObjectId } from 'mongodb';
-import { process_id, validate, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_mmddyyyy_date, validate_number, validate_user_name, validate_prerequisites, validate_password, validate_stevens_email} from "../validation.js";
 const router = express.Router();
 const pendingUsers = new Map();
 
 router
+.route('/')
+.get(async (req, res) => {
+    try {
+        return res.status(404).json({error: "Page not found!"});
+    } catch (e) {
+        // Something went wrong with the server!
+        return res.status(500).send("500: " + e);
+    }
+})
+router
 .route('/login')
 .get(async (req, res) => {
-    
     try{
-      if (!(Object.keys(req.body).length === 0)) {
-        return res.status(400).send("400: Route was not expecting json");
-      }
-        return res.status(200).render('login')
+        return res.status(200).render('login') //change to login handlebars
     }catch(e){
         return res.status(500).render("500: " + e)
     }
@@ -35,8 +40,9 @@ router
     }catch(e){
         return res.status(400).send("400: " + e)
     }
-    if(user_name === null || password === null) return res.status(500).send("500: One or more inputs was not set in validation")
     try{
+        const user_name = xss(req.body.user_name);
+        const password = xss(req.body.password);
         const loginUser = await userData.validateUser(user_name, password); //assuming return value of validate user is the user object
         console.log(loginUser);
         req.session.user = {
@@ -52,25 +58,16 @@ router
         return res.status(200).redirect('/user/profile');
         //return res.status(200).send(loginUser)
     }catch(e){
-        return res.status(500).render("500: " + e) //update error
+        return res.status(500).json("500: " + e) //update error
     }
 
 })
 
 
 router.route('/register')
-  .get((req, res) => {
-    try{
-      if (!(Object.keys(req.body).length === 0)) {
-        return res.status(400).send("400: Route was not expecting json");
-      }
-      return res.status(200).render('register')
-    }catch(e){
-      return res.status(500).render("500: " + e)
-    }
-  }
-)
+  .get((req, res) => res.status(200).render('register'))
   .post(async (req, res) => {
+
     let user_name, password, email = null;
     console.log(req.body)
     try{
@@ -88,6 +85,7 @@ router.route('/register')
       return res.status(400).send("400: " + e)
     }
     if(user_name === null || password === null || email === null) return res.status(500).send("500: One or more inputs was not set in validation")
+
     try {
       /* const verificationCode = crypto.randomInt(100000, 999999).toString();
       
@@ -141,10 +139,7 @@ router
 .route('/profile')
 .get(async (req, res) => {
     try{
-        if (!(Object.keys(req.body).length === 0)) {
-          return res.status(400).send("400: Route was not expecting json");
-        }
-        return res.status(200).render('profile', {user_name: xss(req.session.user.user_name), email: xss(req.session.user.email), reviews: xss(req.session.user.reviews)})
+        return res.status(200).render('profile', {user_name: req.session.user.user_name, email: req.session.user.email, reviews: req.session.user.reviews}) //change to profile handlebars
     }catch(e){
         return res.status(500).send("500: " + e)
     }
@@ -153,33 +148,17 @@ router
 .route('/signout')
 .get(async (req, res) => {
     try{
-        if (!(Object.keys(req.body).length === 0)) {
-          return res.status(400).send("400: Route was not expecting json");
-        }
         req.session.destroy();
         res.render('signout');
       }catch(e){
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(400).json({ error: 'Internal Server Error' });
       }
 });
 
 router
 .route('/:user_name')
 .get(async (req, res) => {
-    let user_name = null;
-    try{
-      if (!(Object.keys(req.body).length === 0)) {
-        return res.status(400).send("400: Route was not expecting json");
-      }
-    }catch(e){
-      return res.status(500).send("500: " + e)
-    }
-    try{
-      user_name = validate(xss(req.params.user_name), validate_string, [validate_user_name])
-    }catch(e){
-      return res.status(400).send("400: " + e)
-    }
-    if(user_name === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    const user_name = xss(req.params.user_name)
     try {
         const foundUser = await userData.getUserByName(user_name)
         return res.status(200).json(foundUser)
@@ -188,20 +167,7 @@ router
     }    
 })
 .delete(async (req, res) => {
-  let user_name = null;
-  try{
-    if (!(Object.keys(req.body).length === 0)) {
-        return res.status(400).send("400: Route was not expecting json");
-    }
-  }catch(e){
-    return res.status(500).send("500: " + e)
-  }
-  try{
-    user_name = validate(xss(req.params.user_name), validate_string, [validate_user_name])
-  }catch(e){
-    return res.status(400).send("400: " + e)
-  }
-  if(user_name === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    const user_name = xss(req.params.user_name)
     try {
         const deletedUser = await userData.deleteUser(user_name)
         return res.status(200).json(deletedUser)

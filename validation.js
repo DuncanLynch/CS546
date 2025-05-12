@@ -34,9 +34,9 @@ export function only_numbers(str) {
 
 // ObjectId Validator
 export const process_id = (id) => {
-    if (!id || typeof id !== 'string' || id.trim().length === 0) throw new Error("Empty string!");
+    if (!id || typeof id !== 'string' || id.trim().length === 0) return false;
     id = id.trim();
-    if (!ObjectId.isValid(id)) throw new Error("Input is not an ID!");
+    if (!ObjectId.isValid(id)) return false;
     return id;
 };
 
@@ -85,11 +85,12 @@ export const validate_stevens_email = (email) => {
     if (!stevensRegex.test(email)) throw new Error("Email must be a valid stevens.edu address!");
 };
 
-// Date Format: "MM/DD/YYYY"
-export const validate_mmddyyyy_date = (dateStr) => {
-    const regex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/(19|20)\d\d$/;
-    if (!regex.test(dateStr)) throw new Error("Date must be in MM/DD/YYYY format!");
+// Date Format: "YYYY-MM-DD"
+export const validate_yyyymmdd_date = (dateStr) => {
+  const regex = /^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+  if (!regex.test(dateStr)) throw new Error("Date must be in YYYY-MM-DD format!");
 };
+
 
 
 export function validate_prerequisites(prereqString) {

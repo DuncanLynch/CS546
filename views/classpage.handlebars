@@ -1,30 +1,85 @@
-<script src="/js/main.js"></script>
+{{#if user_logged}}
+<script>
+  const userData = {{{userJson}}};
+</script>
+{{/if}}
+<script>
+  const classData = {{{json class}}};
+</script>
+<script src="/public/js/clid_script.js"></script>
 
-<p>Idea: Display all info regarding class found</p>
+<div class="class-info">
+  <h2>{{class.course_code}} - {{class.course_name}}</h2>
+  <div class="flex-row">
+    <div class="stats">
+      <h3>Class Stats</h3>
+      <div class="stats-container">
+        <label>Course Description:</label>
+        <p>{{class.course_description}}</p>
+        <label>Typically Offered:</label>
+        <p>{{class.typically_offered}}</p>
+        <label>Prerequisites:</label>
+        <p>{{class.prerequisites}}</p>
+        <div class="flex-row">
+          <div>
+          <label>Total Rating:</label>
+          <p id="avg-rating">{{class.class_total_rating}}</p>
+          </div>
+          <div>
+          <label>Quality Rating:</label>
+          <p id="avg-rating">{{class.class_quality_rating}}</p>
+          </div>
+          <div>
+          <label>Difficulty Rating:</label>
+          <p id="avg-rating">{{class.class_difficulty_rating}}</p>
+          </div>
+        </div>
+      </div>
+      
+      <form id="review-form">
+        <label for="professor-name">Professor Name:</label>
+        <input type="text" id="professor-name" name="professor_name" placeholder="Professor Name" required>
 
-<h2>{{course_code}} {{course_name}}</h2>
-<br>
-<p>Course Description: {{course_description}}</p>
-<br>
-<p>PreRequisites: {{prerequisites}}</p>
-<br>
-<p>Semester(s) Offered: {{course_instructor}}</p>
-<br>
-<p>Professor(s): {{professors}}</p>
-<br>
-<p>Overall Rating: {{class_total_rating}}</p>
-<br>
-<p>Overall Quality: {{class_total_quality}}</p>
-<br>
-<p>Overall Difficulty: {{class_total_difficulty}}</p>
-<br>
-<p>Reviews:</p>
-<ul id="classlist">
-  {{#each reviews}}
-    <li>
-      <p>Title: {{review_title}}</p>
-      <p>Rating: {{this.rating}}</p>
-      <p>Review: {{this.review}}</p>
-    </li>
-  {{/each}}
-</ul>
+        <label for="professor-email">Professor Email:</label>
+        <input type="email" id="professor-email" name="professor_email" placeholder="Professor Email" required>
+
+        <label for="review-title">Review Title:</label>
+        <input type="text" id="review-title" name="review_title" placeholder="Review Title" required>
+
+        <div class="ratings">
+          <label for="total-rating">Total Rating (1–5):</label>
+          <input type="number" id="total-rating" name="total_rating" min="1" max="5" step="0.1" required>
+
+          <label for="difficulty-rating">Difficulty Rating (1–5):</label>
+          <input type="number" id="difficulty-rating" name="difficulty_rating" min="1" max="5" step="0.1" required>
+
+          <label for="quality-rating">Quality Rating (1–5):</label>
+          <input type="number" id="quality-rating" name="quality_rating" min="1" max="5" step="0.1" required>
+        </div>
+
+        <label for="review">Your Review:</label>
+        <textarea id="review" name="review" placeholder="Write your review here..." required></textarea>
+        {{#if user_logged}}
+        <button type="submit">Submit Review</button>
+        {{else}}
+        <a href="/user/login">You Must Be Logged In To Submit A Review</a>
+        {{/if}}
+      </form>
+      
+
+    </div>
+
+    <div class="prof-rev" hidden>
+      <div>
+        <h3>Professors</h3>
+        <div class="prof-list">
+        </div>
+      </div>
+      <div class="professor-buttons">
+        <button id="0" class="professor-button-active">All Professors</button>
+      </div>
+      <ul class="review-container">
+      </ul>
+    </div>
+  </div>
+</div>

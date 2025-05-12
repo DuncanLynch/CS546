@@ -2,7 +2,7 @@
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 import { users } from "../mongodb/mongoCollections.js";
-import { validate, validate_string, validate_password, validate_stevens_email, process_id, validate_mmddyyyy_date, validate_user_name } from "../validation.js";
+import { validate, validate_string, validate_password, validate_stevens_email, process_id, validate_yyyymmdd_date, validate_user_name } from "../validation.js";
 
 // Constants
 const SALT_ROUNDS = 10;
@@ -49,21 +49,26 @@ export async function getAllUsers() {
 export async function deleteUser(user_name) {
     validate(user_name, validate_string, [validate_user_name]);
     const userCollection = await users();
-    const result = await userCollection.deleteOne({ user_name });
-    if (result.deletedCount === 0) throw new Error("User not found or not deleted.");
-    return true;
+    const result = await userCollection.findOneAndDelete({ user_name });
+    if (!result) {
+        throw new Error("User not found or not deleted.");
+    }
+    return result;
 }
+
 
 export async function addReview(user_name, review_object) {
     validate(user_name, validate_string, [validate_user_name]);
 
     const userCollection = await users();
-    const result = await userCollection.updateOne(
+    let result = await userCollection.findOneAndUpdate(
         { user_name },
-        { $push: { reviews: review_object } }
+        { $push: { reviews: review_object } },
+        {returnDocument: "after"}
     );
-    if (result.modifiedCount === 0) throw new Error("Failed to add review.");
-    return true;
+    if (!result) throw new Error("Failed to add review.");
+    result._id = result._id.toString();
+    return result;
 }
 
 export async function validateUser(user_name, password) {
@@ -72,10 +77,8 @@ export async function validateUser(user_name, password) {
     const userCollection = await users();
     const user = await userCollection.findOne({ user_name });
     if (!user) throw new Error("Invalid username or password.");
-    console.log("user: " + user)
-    //console.log("match: " + match)
-    const match = await bcrypt.compare(password, user.hashed_password);
 
+    const match = await bcrypt.compare(password, user.hashed_password);
     if (!match) throw new Error("Invalid username or password.");
 
     return { _id: user._id, user_name: user.user_name, email: user.email, reviews: user.reviews };
@@ -89,7 +92,7 @@ export async function updateReview(class_id, review_id, updatedFields) {
     const _rid = new ObjectId(review_id);
 
     const userCollection = await users();
-
+    console.log(updatedFields)
     const updateResult = await userCollection.updateOne(
         {
             _id,
@@ -111,11 +114,10 @@ export async function updateReview(class_id, review_id, updatedFields) {
     return updatedClass;
 }
 
-export async function deleteReview(class_id, reviewer_id, review_date) {
-    validate(class_id, validate_string, [process_id]);
-    validate(reviewer_id, validate_string, [process_id]);
-    validate(review_date, validate_string, [validate_mmddyyyy_date]);
-    const _id = new ObjectId(class_id);
+export async function deleteReview(user_id, review_id) {
+    validate(user_id, validate_string, [process_id]);
+    validate(review_id, validate_string, [process_id]);
+    const _id = new ObjectId(user_id);
 
     const userCollection = await users();
     const updateResult = await userCollection.updateOne(
@@ -123,8 +125,7 @@ export async function deleteReview(class_id, reviewer_id, review_date) {
         {
             $pull: {
                 reviews: {
-                    reviewer_id: reviewer_id,
-                    review_date: review_date
+                    _rid: review_id,
                 }
             }
         }

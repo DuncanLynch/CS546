@@ -21,6 +21,7 @@ const rewriteUnsupportedBrowserMethods = (req, res, next) => {
   }
   next();
 };
+
 // Middleware
 app.use('/class', (req, res, next) => {
   if(req.method === 'POST') return middleware.loggedin(req, res, next, '/') //unsure about redirect may need further altering
@@ -58,6 +59,15 @@ app.use('/user/signout', (req, res, next) => {
 app.use('/user/profile', (req, res, next) => {
   if(req.method === 'GET' || req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login');
   next();
+
+
+const hbs = exphbs.create({
+  helpers: {
+    json: function (context) {
+      return JSON.stringify(context);
+    }
+  }
+
 });
 // Middleware and Static Files
 app.use('/public', express.static('public'));
@@ -66,10 +76,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(rewriteUnsupportedBrowserMethods);
 
 // Set up Handlebars engine with layout directory
-app.engine('handlebars', exphbs.engine({defaultLayout: 'main'}));
+app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
-
-
 
 
 // Import and configure routes

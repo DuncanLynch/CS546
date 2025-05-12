@@ -1,9 +1,58 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-weight: 500;
+}
+  
+.layout {
+    display: flex;
+    height: 100vh; /* Full height viewport */
+}
+  
+.sidebar {
+    width: 12%;
+    background-color: #3d0d01;
+    color: white;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+  
+.sidebar h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+  
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    margin-bottom: 10px;
+    padding: 8px;
+    background-color: #4a1203;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, transform 0.3s ease-out;
+}
+  
+.sidebar a:hover {
+    transform: scale(1.05);
+    background-color: #270902;
+}
+  
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+  
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     background-color: #f4f6f9;
     color: #333;
-    padding: 20px;
 }
 
 h1 {
@@ -17,6 +66,7 @@ p {
 }
 
 .container {
+    align-content: center;
     max-width: 800px;
     margin: auto;
     background: #fff;
@@ -26,7 +76,7 @@ p {
 }
 
 a,
-button {
+nav button {
     display: inline-block;
     background-color: #3d0d01;
     color: white;
@@ -35,12 +85,29 @@ button {
     border: none;
     border-radius: 4px;
     margin-top: 10px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease-out, transform 0.3s ease-out;
 }
 
-a:hover,
-button:hover {
+form button {
+    display: inline-block;
+    background-color: #3d0d01;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease-out, transform 0.3s ease-out;
+    font-size: large;
+}
+form button:hover {
     background-color: #1b0601;
+    transform: scale(1.1);
+}
+a:hover,
+nav button:hover {
+    background-color: #1b0601;
+    transform: scale(1.05);
 }
 
 footer {
@@ -92,12 +159,12 @@ form label {
 }
 
 .top-bar {
+    width: 100%;
     background-color: #3d0d01;
-    padding: 15px 20px;
+    padding: 15px 0px;
     display: flex;
     justify-content: space-between; 
     align-items: center;
-    border-radius: 8px;
     margin-bottom: 30px;
 }
 
@@ -111,4 +178,312 @@ form label {
 .top-bar a {
     margin-left: 20px;
     text-align: right;
+}
+
+#classlist {
+    width: 800px;
+    height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: auto;
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.row-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.names {
+    text-align: center;
+}
+
+.horizontal {
+    background-color: #ffffff;
+    height: 2px;
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#searchInput {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    margin: 0 auto 15px auto;
+}
+
+
+#searchInput:focus {
+    border-color: #4e302c;
+    box-shadow: 0 0 8px rgba(99, 56, 56, 0.568);
+}
+
+.flex-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 4rem;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.professor-buttons {
+    max-width: 100%;
+    overflow-y: hidden;
+    overflow-x: auto;
+}
+.professor-button {
+    background-color: #532112;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    margin: 5px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .professor-button:hover {
+    background-color: #532112;
+    transform: scale(1.05);
+  }
+
+  .professor-button-active {
+    background-color: #310d02;
+    color: #ffffff;
+    padding: 10px 16px;
+    margin: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: none;
+    border-radius: 8px;
+  }
+  
+.class-info {
+  color: #333;
+  border-radius: 8px;
+  max-width: 1800px; /* This will make it take 90% of its container */
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  margin: 0 auto; /* Centers it within the container */
+}
+
+.stats {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 0 auto;
+    align-content: center;
+    max-width: 50%;
+    text-align: center;
+}
+
+.prof-rev {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 0 auto;
+    align-content: center;
+    max-width: 50%;
+    text-align: center;
+}
+
+.stats-container {
+    display: block;
+}
+
+.class-info h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.stats h3, .prof-rev h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.stats-container {
+  margin-bottom: 20px;
+}
+
+.stats-container label {
+  font-weight: bold;
+  display: block;
+  margin-top: 10px;
+}
+
+.stats-container p {
+  margin: 5px 0 10px;
+}
+
+form#review-form {
+  display: flex;
+  flex-direction: column;
+  background-color: #e6e6e6;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 10px;
+}
+
+form#review-form label {
+  font-weight: bold;
+}
+
+#review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+#review-form input,
+#review-form textarea {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+.ratings {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.ratings label {
+  margin-right: 8px;
+}
+
+.ratings input {
+  width: 70px;
+}
+
+
+.prof-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.review-container {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  max-height: 90%;
+  overflow-y: auto;
+}
+
+.review-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  background-color: #fafafa;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.review-date {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.review-body {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.overall-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+  border-right: 1px solid #ccc;
+  padding-right: 15px;
+}
+
+.rating-badge {
+  background-color: #0074D9;
+  color: white;
+  font-size: 1.5em;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.other-info {
+  flex-grow: 1;
+}
+
+.other-ratings {
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 5px;
+}
+
+.review-content p {
+  margin: 0;
+}
+
+.review-footer {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.like-button, .dislike-button {
+  background-color: #f1f1f1;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.like-button:hover {
+  background-color: #d4edda;
+}
+
+.dislike-button:hover {
+  background-color: #f8d7da;
 }
