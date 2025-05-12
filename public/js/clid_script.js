@@ -14,74 +14,92 @@ $(document).ready(function () {
     $('#0').removeClass('professor-button');
   });
 
-  if (classData.professors && classData.professors.length > 0) {
-    $('.prof-rev').removeAttr('hidden');
+    if (classData.professors && classData.professors.length > 0) {
+      $('.prof-rev').removeAttr('hidden');
+      
+      const reviewCounts = {};
+      classData.reviews.forEach((review) => {
+        const id = review.professor_id;
+        reviewCounts[id] = (reviewCounts[id] || 0) + 1;
+      });
 
-    classData.professors.forEach(function (profId) {
-      $.ajax({
-        url: `/professor/${profId}`,
-        method: 'GET',
-        success: function (professor) {
-          const button = $('<button>')
-            .text(professor.professor_name)
-            .attr('id', profId)
-            .addClass('professor-button');
+      const sortedProfessors = [...classData.professors].sort((a, b) => {
+        return (reviewCounts[b] || 0) - (reviewCounts[a] || 0);
+      });
 
-          button.on('click', function () {
-            $('.review-container li').each(function () {
-              const review = $(this);
-              const reviewProfessorId = review.data('professor-id');
+      sortedProfessors.forEach(function (profId) {
+        $.ajax({
+          url: `/professor/${profId}`,
+          method: 'GET',
+          success: function (professor) {
+            const button = $('<button>')
+              .text(professor.professor_name)
+              .attr('id', profId)
+              .addClass('professor-button');
 
-              if (reviewProfessorId === profId) {
-                review.show();
-              } else {
-                review.hide();
+            button.on('click', function () {
+              $('.review-container li').each(function () {
+                const review = $(this);
+                const reviewProfessorId = review.data('professor-id');
+
+                if (reviewProfessorId === profId) {
+                  review.show();
+                } else {
+                  review.hide();
+                }
+              });
+
+              if (activeButton) {
+                $(`#${activeButton}`).removeClass("professor-button-active");
+                $(`#${activeButton}`).addClass("professor-button");
               }
+
+              activeButton = profId;
+              button.addClass('professor-button-active');
+              button.removeClass('professor-button');
+
+              const wishlistButton = $(`
+                <button class="add-wishlist" data-id="${profId}">
+                  ⭐ Add <b>${professor.professor_name}</b> to Wishlist
+                </button>
+              `);
+              $('#wishlist-container').empty().append(wishlistButton);
             });
 
-            if (activeButton) {
-              $(`#${activeButton}`).removeClass("professor-button-active");
-              $(`#${activeButton}`).addClass("professor-button");
-            }
-
-            activeButton = profId;
-            button.addClass('professor-button-active');
-            button.removeClass('professor-button');
-
-            const wishlistButton = $(`
-              <button class="add-wishlist" data-id="${profId}">
-                ⭐ Add <b>${professor.professor_name}</b> to Wishlist
-              </button>
-            `);
-            $('#wishlist-container').empty().append(wishlistButton);
-          });
-
-          $('.professor-buttons').append(button);
-        },
-        error: function () {
-          console.error(`Failed to fetch data for professor ID ${profId}`);
-        }
+            $('.professor-buttons').append(button);
+          },
+          error: function () {
+            console.error(`Failed to fetch data for professor ID ${profId}`);
+          }
+        });
       });
+    } else {
+      $('.prof-rev').attr('hidden', true);
+    }
+    const sortedReviews = [...classData.reviews].sort((a, b) => {
+      const aLikes = a.likes || 0;
+      const bLikes = b.likes || 0;
+      return bLikes - aLikes;
     });
-  } else {
-    $('.prof-rev').attr('hidden', true);
-  }
 
-  classData.reviews.forEach(function (review) {
+  sortedReviews.forEach(function (review) {
     const prof = $.ajax({url: `/professor/${review.professor_id}`, type: "GET", success: function (response) {
     const commentHTML = (review.comments || []).map(comment => `
       <div class="comment">
-        <p><strong>${comment.user_name}</strong> (${new Date(comment.date).toLocaleDateString()}):</p>
+        <p><span class='strong'>${comment.user_name}</span> (${new Date(comment.date).toLocaleDateString()}):</p>
         <p>${comment.text}</p>
       </div>
     `).join('');
 
-    const li = $('<li>').data('professor-id', review.professor_id)
+    const li = $('<li>')
+    .data('professor-id', review.professor_id)
+    .data('reviewer-name', review.reviewer_name)
+
     .append(`
       <div class="review-card">
         <div class="review-header">
           <div class="reviewer-info">
-            <p><strong>${review.reviewer_name}</strong></p>
+            <p class='strong'>${review.reviewer_name}</p>
             <p>Professor ${response.professor_name} (${response.email})</p>
           </div>
           <div class="review-date">
@@ -95,8 +113,8 @@ $(document).ready(function () {
           </div>
           <div class="other-info">
             <div class="other-ratings">
-              <div><strong>Difficulty:</strong> ${review.review_difficulty_rating}</div>
-              <div><strong>Quality:</strong> ${review.review_quality_rating}</div>
+              <div><span class='strong'>Difficulty:</span> ${review.review_difficulty_rating}</div>
+              <div><span class='strong'>Quality:</span> ${review.review_quality_rating}</div>
             </div>
             <div class="review-content">
               <h4>${review.review_title}</h4>
@@ -192,7 +210,7 @@ $(document).ready(function () {
       errorMessages.forEach(function (msg) {
         errorDiv.append(`<p class='error'>'${msg}'</p>`);
       });
-      $('form').append(errorDiv);
+      $('#review-form').append(errorDiv);
       return;
     }
 
@@ -328,6 +346,8 @@ $(document).ready(function () {
     const form = $(this);
     const reviewId = form.attr('id');
     const commentText = form.find('input[name="commentText"]').val().trim();
+    const reviewerName = form.closest('li').data('reviewer-name');
+
 
     if (!commentText) return;
     const checkBadWords = (text) => {
@@ -340,8 +360,9 @@ $(document).ready(function () {
     }
     if (errorMessages.length > 0) {
       errorMessages.forEach(function (msg) {
-        errorDiv.append(`<p class='error'>'${msg}'</p>`);
+        form.append(`<p class='error'>'${msg}'</p>`);
       });
+      return
     }
     $.ajax({
       url: `/reviews/comment/${reviewId}`,
@@ -350,12 +371,13 @@ $(document).ready(function () {
       data: JSON.stringify({
         classId: classData._id,
         commentText: commentText, 
+        reviewer: reviewerName,
       }),
       success: function (newComment) {
         
         const commentHTML = `
           <div class="comment">
-            <p><strong>${userData.user_name}</strong> (${new Date().toISOString().substring(0,10)}):</p>
+            <p><span class='strong'>${userData.user_name}</span> (${new Date().toISOString().substring(0,10)}):</p>
             <p>${commentText}</p>
           </div>
         `;
@@ -380,7 +402,7 @@ $(document).ready(function () {
         if (response.added)
           button.text("✅ Added");
         else 
-          button.text("✅ Added");
+          button.text("❌ Already Added!");
       },
       error: function(e){
         alert(`${userData._id}, ${id}`);
