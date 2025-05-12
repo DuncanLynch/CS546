@@ -69,9 +69,9 @@ router
     const user_name = xss(req.body.user_name)
     console.log(req.body);
     try{
-        const newReview = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name})
-        await userData.addReview(user_name, newReview) //awaiting on this function, update param upon duncan push
-        return res.status(200).send(newReview)
+        const updateClass = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name});
+        const newReview = await userData.addReview(user_name, updateClass.reviews[updateClass.reviews.length - 1]);
+        return res.status(200).send(newReview);
 
     }catch(e){
         console.log(e);

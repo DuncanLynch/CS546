@@ -1,27 +1,19 @@
-<script src="/js/main.js"></script>
+<script>
+  const userData = {
+    user_name: "{{user_name}}",
+    email: "{{email}}",
+    reviews: {{{json reviews}}}
+  };
+</script>
+<script src="/public/js/profile.js"></script>
 
-<p>Hello {{user_name}}, find your information and reviews below:</p>
-<br>
-<p>Username: {{user_name}}</p>
-<p>Email: {{email}}</p>
-{{#if reviews}}<p>Reviews:</p>{{/if}}
-<ul>
-  {{#each reviews}}
-    <li>
-      <p>Course Code: {{this.course_code}}</p>
-      <p>Professor ID: {{this.professor_id}}</p>
-      <p>Review Title: {{this.review_title}}</p>
-      <p>Reviewer ID: {{this.reviewer_id}}</p>
-      <p>Review Date: {{this.review_date}}</p>
-      <p>Contents: {{this.review_contents}}</p>
-      <p>Likes: {{this.likes}}</p>
-      <p>Dislikes: {{this.dislikes}}</p>
-      <p>Quality Rating: {{this.review_quality_rating}}</p>
-      <p>Difficulty Rating: {{this.review_difficulty_rating}}</p>
-      <p>Total Rating: {{this.review_total_rating}}</p>
-    </li>
-    <br>
-  {{/each}}
-</ul>
-<p>Click <a href="/user/signout">here</a> to logout.</p>
-<p>Click <a href="/">here</a> to go back to the homepage.</p>
+<h2>Hello {{user_name}}, find your information and reviews below:</h2>
+<h3>Username: {{user_name}}</h3>
+<h3>Email: {{email}}</h3>
+
+<h2>Your Reviews: </h2>
+<ul class="user-review-container"></ul>
+
+
+<a href="/user/signout">Logout</a>
+<a href="/">To Homepage</a>

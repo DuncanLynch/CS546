@@ -176,10 +176,14 @@ $(document).ready(function () {
             review_date: new Date().toISOString().substring(0,10),
             reviewer_id: userData._id
           },
+          xhrFields:{
+            withCredentials: true
+          },
           success: function (response) {
             console.log("Review added!");
             alert('Review submitted successfully!');
             $('#review-form')[0].reset();
+            window.location.reload();
           },
           error: function () {
             alert('Failed to submit review. Please try again.');

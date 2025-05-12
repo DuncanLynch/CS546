@@ -139,3 +139,30 @@ export async function deleteReview(user_id, review_id) {
     updatedClass._id = updatedClass._id.toString();
     return updatedClass;
 }
+
+export async function getReview(user_id, review_id){
+    validate(user_id, validate_string, [process_id]);
+    validate(review_id, validate_string, [process_id]);
+    const _id = new ObjectId(user_id);
+    const _rid = new ObjectId(review_id);
+
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id });
+    if (!user) throw new Error("User not found.");
+
+    const review = user.reviews.find(r => r._rid.equals(_rid));
+    if (!review) throw new Error("Review not found.");
+
+    return review;
+}
+
+export async function getAllReviews(user_id) {
+    validate(user_id, validate_string, [process_id]);
+    const _id = new ObjectId(user_id);
+
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id });
+    if (!user) throw new Error("User not found.");
+
+    return user.reviews;
+}

@@ -1,0 +1,58 @@
+$(document).ready(function () {
+  const container = $('.user-review-container');
+
+  if (!userData || !userData.reviews || userData.reviews.length === 0) {
+    container.append('<p>You have not written any reviews yet.</p>');
+    return;
+  }
+
+  userData.reviews.forEach((review) => {
+    const id = review.professor_id;
+    $.ajax({
+      url: '/professor/' + id,
+      method: 'GET',
+      success: function (prof) {
+        const li = $('<li>');
+        const card = $(`
+          <div class="review-card">
+            <div class="review-header">
+              <div class="reviewer-info">
+                <h2><b>${review.course_code}</b></h2>
+                <h3>Professor ${prof.professor_name} (${prof.email})</h3>
+              </div>
+              <div class="review-date">
+                <p>${review.review_date}</p>
+              </div>
+            </div>
+            <div class="review-body">
+              <div class="overall-rating">
+                <div class="rating-badge">${review.review_total_rating}</div>
+                <p>Overall</p>
+              </div>
+              <div class="other-info">
+                <div class="other-ratings">
+                  <div><strong>Difficulty:</strong> ${review.review_difficulty_rating}</div>
+                  <div><strong>Quality:</strong> ${review.review_quality_rating}</div>
+                </div>
+                <div class="review-content">
+                  <h4>${review.review_title}</h4>
+                  <p>${review.review_contents}</p>
+                </div>
+              </div>
+            </div>
+            <div class="review-footer">
+              <button class="like-button" data-id="${review._rid}">👍 ${review.likes}</button>
+              <button class="dislike-button" data-id="${review._rid}">👎 ${review.dislikes}</button>
+            </div>
+          </div>
+        `);
+
+        li.append(card);
+        container.append(li);
+      },
+      error: function () {
+        console.error(`Failed to load professor ${review.professor_id}`);
+      }
+    });
+  });
+});

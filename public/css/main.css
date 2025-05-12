@@ -452,6 +452,7 @@ form#review-form label {
 
 .other-info {
   flex-grow: 1;
+  min-width: 0;
 }
 
 .other-ratings {
@@ -464,6 +465,8 @@ form#review-form label {
 
 .review-content p {
   margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .review-footer {

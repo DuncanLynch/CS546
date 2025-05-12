@@ -99,9 +99,9 @@ console.log("review_quality_rating:", review_quality_rating, typeof review_quali
 
     const classCollection = await classes();
     const currentClass = await classCollection.findOne({ course_code });
-    const tr = (review_total_rating + currentClass.class_total_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
-    const dr = (review_difficulty_rating + currentClass.class_difficulty_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
-    const qr = (review_quality_rating + currentClass.class_quality_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
+    const tr = ((review_total_rating + currentClass.class_total_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)).toFixed(1);
+    const dr = ((review_difficulty_rating + currentClass.class_difficulty_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)).toFixed(1);
+    const qr = ((review_quality_rating + currentClass.class_quality_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)).toFixed(1);
     const updateResult = await classCollection.findOneAndUpdate(
         { course_code },
         {
