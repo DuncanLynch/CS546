@@ -2,7 +2,7 @@ import express from 'express';
 const app = express();
 import configRoutes from './routes/index.js';
 import exphbs from 'express-handlebars';
-import { login, signout } from './middleware.js';
+import * as middleware from './middleware.js';
 import session from 'express-session';
 
 const rewriteUnsupportedBrowserMethods = (req, res, next) => {
@@ -47,21 +47,54 @@ app.use((req, res, next) => {
 
 
 // Middleware for login and signout routes
+app.use('/class', (req, res, next) => {
+  if(req.method === 'POST') return middleware.loggedin(req, res, next, '/') //unsure about redirect may need further altering
+  next();
+})
+app.use('/class/:id', (req, res, next) => {
+  if(req.method === 'DELETE') return middleware.noaccess(req, res, next, '/')
+  next();
+})
+app.use('/professor', (req, res, next) => {
+  if(req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login')
+  next();
+})
+app.use('/professor/:id', (req, res, next) => {
+  if(req.method === 'DELETE') return middleware.noaccess(req, res, next, '/')
+  next();
+})
+app.use('/user/:user_name', (req, res, next) => {
+  if(req.method === 'DELETE') return middleware.noaccess(req, res, next, '/')
+  next();
+})
 app.use('/user/login', (req, res, next) => {
-  if (req.method === 'GET') {
-    return login(req, res, next);
-  }
+  if(req.method === 'GET' || req.method === 'POST') return middleware.notloggedin(req, res, next, '/user/profile');
   next();
 });
-
+app.use('/user/login', (req, res, next) => {
+  if(req.method === 'GET' || req.method === 'POST') return middleware.notloggedin(req, res, next, '/user/profile');
+  next();
+});
 app.use('/user/signout', (req, res, next) => {
-  if (req.method === 'GET') {
-    return signout(req, res, next);
-  }
+  if (req.method === 'GET') return middleware.loggedin(req, res, next, '/user/login');
   next();
 });
-
-// Session configuration
+app.use('/user/profile', (req, res, next) => {
+  if(req.method === 'GET' || req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login');
+  next();
+});
+app.use('/reviews/:classId', (req, res, next) => {
+  if(req.method === 'POST') return middleware.loggedin(req, res, next, '/reviews/:classId') //check if userid is found in any of the reviws of that class
+    next();
+})
+app.use('/reviews//review/:id', (req, res, next) => {
+  if(req.method === 'DELETE') return middleware.loggedin(req, res, next, '/reviews/:classId') //check if userid is in review of that class
+    next();
+})
+app.use('/reviews/review/:reviewId/comments', (req, res, next) => {
+  if(req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login')
+  next();
+})
 
 
 // Import and configure routes
