@@ -1,6 +1,7 @@
 import express from 'express';
 import * as professorData from '../data/professors.js'
 import * as classData from '../data/classes.js'
+import * as userData from '../data/users.js'
 import xss from 'xss'
 import { ObjectId } from 'mongodb';
 const router = express.Router();
@@ -57,4 +58,12 @@ router
         return res.status(404).send("404: "+ e)
     }
 })
+router.post('/:user_id/:prof_id', (async (req,res) => {
+    const user_id = xss(req.params.user_id);
+    const prof_id = xss(req.params.prof_id);
+    try{
+        await userData.addWishlist(user_id, prof_id);
+        res.json({added: true});
+    }catch(e){return res.status(500).send("500: " + e);}
+}))
 export default router;

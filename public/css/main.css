@@ -39,7 +39,7 @@ html, body {
   
 .sidebar a:hover {
     transform: scale(1.05);
-    background-color: #270902;
+    background-color: #f08585;
 }
   
 .main-content {
@@ -51,14 +51,8 @@ html, body {
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
-    background-color: #f4f6f9;
+    background-color: #f9f6f6;
     color: #333;
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #ffffff;
 }
 
 p {
@@ -452,6 +446,7 @@ form#review-form label {
 
 .other-info {
   flex-grow: 1;
+  min-width: 0;
 }
 
 .other-ratings {
@@ -464,6 +459,8 @@ form#review-form label {
 
 .review-content p {
   margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .review-footer {
@@ -493,3 +490,78 @@ form#review-form label {
     flex-direction: column;
     gap: .1rem;
 }
+
+.wishlist-container{
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  background-color: #fafafa;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.wishlist-container li {
+  text-align: center;
+  flex: 1 1 calc(33.33% - 20px);
+  box-sizing: border-box
+}
+
+.add-wishlist{
+  background-color: #f1f1f1;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.add-wishlist:hover{
+  background-color: lightgoldenrodyellow
+}
+
+.wishlist-card{
+  border-radius: 8px;
+  padding: 15 px;
+  background-color: transparent;
+}
+
+.duck{
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 10px auto;
+}
+
+.prompt{
+  font-size: 2 px;
+}
+
+.register{
+  text-align: center;
+  width: 30%;
+  min-width: 250px;
+  box-shadow: 0px 0px 30px rgba(151, 150, 150, 0.6);
+  padding: 50px;
+}
+
+.login{
+  text-align:center;
+  width:25%;
+  min-width: 250px;
+  box-shadow: 0px 0px 30px rgba(246, 192, 192, 0.6);
+  padding: 50px;
+}
+
+.centerForm{
+  align-items:center;
+  display:flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.already{
+  text-align: center;
+}
+

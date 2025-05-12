@@ -2,6 +2,8 @@
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 import { users } from "../mongodb/mongoCollections.js";
+import { profs } from "../mongodb/mongoCollections.js";
+import * as profData from "./professors.js"
 import { validate, validate_string, validate_password, validate_stevens_email, process_id, validate_yyyymmdd_date, validate_user_name } from "../validation.js";
 
 // Constants
@@ -25,7 +27,8 @@ export async function createUser(user_name, password, email) {
         user_name,
         hashed_password: hashedPassword,
         email,
-        reviews: [] // optional field to hold reviews
+        reviews: [],
+        wishlist: []
     };
 
     const insertResult = await userCollection.insertOne(newUser);
@@ -82,7 +85,7 @@ export async function validateUser(user_name, password) {
     const match = await bcrypt.compare(password, user.hashed_password);
     if (!match) throw new Error("Invalid username or password.");
 
-    return { _id: user._id, user_name: user.user_name, email: user.email, reviews: user.reviews };
+    return { _id: user._id, user_name: user.user_name, email: user.email, reviews: user.reviews , wishlist: user.wishlist};
 }
 
 
@@ -137,6 +140,72 @@ export async function deleteReview(user_id, review_id) {
     return updatedClass;
 }
 
+export async function getReview(user_id, review_id){
+    validate(user_id, validate_string, [process_id]);
+    validate(review_id, validate_string, [process_id]);
+    const _id = new ObjectId(user_id);
+    const _rid = new ObjectId(review_id);
+
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id });
+    if (!user) throw new Error("User not found.");
+
+    const review = user.reviews.find(r => r._rid.equals(_rid));
+    if (!review) throw new Error("Review not found.");
+
+    return review;
+}
+
+export async function getAllReviews(user_id) {
+    validate(user_id, validate_string, [process_id]);
+    const _id = new ObjectId(user_id);
+
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id });
+    if (!user) throw new Error("User not found.");
+
+    return user.reviews;
+}
+
+export async function addWishlist(user_id, prof_id){
+    validate(user_id, validate_string, [process_id]);
+    validate(prof_id, validate_string, [process_id]);
+
+    const allUsers = await users();
+    const findProf = await profData.getProfessorById(prof_id);
+    if(!findProf){
+        throw new Error("Professor not found.");
+    }
+
+    const user2_id = new ObjectId(user_id);
+    const findUser = await allUsers.findOne({_id: user2_id});
+    if(!findUser){
+        throw new Error("User not found.");
+    }
+    const result = await allUsers.updateOne(
+    { _id: user2_id },
+    { $addToSet: { wishlist: prof_id.toString() } }
+    );
+    
+    if (result.modifiedCount === 0) {
+        throw new Error("Wishlist not updated.");
+    }
+
+  return true;
+}
+
+export async function getWishlist(user_id){
+    validate(user_id, validate_string, [process_id]);
+
+    const userCollection = await users();
+
+    const _id = new ObjectId(user_id);
+    const user = await userCollection.findOne({ _id });
+    if (!user) throw new Error("User not found.");
+
+    return user.wishlist;
+}
+
 export async function addComment(user_name, reviewId, commentText, commentId) {
     user_name = validate(user_name, validate_string, [validate_user_name]);
     reviewId = validate(reviewId, validate_string, [process_id]);
@@ -169,3 +238,4 @@ export async function addComment(user_name, reviewId, commentText, commentId) {
 
     return comment;
 }
+

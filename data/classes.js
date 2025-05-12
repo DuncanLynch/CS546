@@ -94,9 +94,9 @@ export async function addReview({course_code, professor_id, review_title, review
 
     const classCollection = await classes();
     const currentClass = await classCollection.findOne({ course_code });
-    const tr = (review_total_rating + currentClass.class_total_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
-    const dr = (review_difficulty_rating + currentClass.class_difficulty_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
-    const qr = (review_quality_rating + currentClass.class_quality_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
+    const tr = ((review_total_rating + currentClass.class_total_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)).toFixed(1);
+    const dr = ((review_difficulty_rating + currentClass.class_difficulty_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)).toFixed(1);
+    const qr = ((review_quality_rating + currentClass.class_quality_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)).toFixed(1);
     const updateResult = await classCollection.findOneAndUpdate(
         { course_code },
         {
@@ -112,7 +112,7 @@ export async function addReview({course_code, professor_id, review_title, review
                     review_contents,
                     likes: 0,
                     dislikes: 0,
-                    likers: [],
+                    likers: {},
                     review_quality_rating,
                     review_difficulty_rating,
                     review_total_rating,
@@ -180,8 +180,11 @@ export async function updateReview(course_code, rid, updatedFields) {
         }
     );
 
-    if (updateResult.modifiedCount === 0) {
-        throw new Error("Failed to update review: review not found or no changes made.");
+    if (!updateResult) {
+        throw new Error("Failed to update review: review not found.");
+    }
+    if (updateResult.modifiedCount == 0){
+        return {updated: false};
     }
 
     const updatedClass = await classCollection.findOne({ course_code });

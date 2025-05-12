@@ -1,16 +1,19 @@
 $(document).ready(function () {
   let activeButton = "0";
-  $('#0').on('click', function () {
-  $('.review-container li').show(); // Show all reviews
 
-  if (activeButton) {
-    $(`#${activeButton}`).removeClass("professor-button-active");
-    $(`#${activeButton}`).addClass("professor-button");
-  }
-  activeButton = "0";
-  $('#0').addClass('professor-button-active');
-  $('#0').removeClass('professor-button');
+  $('#0').on('click', function () {
+    $('.review-container li').show(); // Show all reviews
+
+    if (activeButton) {
+      $(`#${activeButton}`).removeClass("professor-button-active");
+      $(`#${activeButton}`).addClass("professor-button");
+    }
+
+    activeButton = "0";
+    $('#0').addClass('professor-button-active');
+    $('#0').removeClass('professor-button');
   });
+
   if (classData.professors && classData.professors.length > 0) {
     $('.prof-rev').removeAttr('hidden');
 
@@ -23,6 +26,7 @@ $(document).ready(function () {
             .text(professor.professor_name)
             .attr('id', profId)
             .addClass('professor-button');
+
           button.on('click', function () {
             $('.review-container li').each(function () {
               const review = $(this);
@@ -39,10 +43,19 @@ $(document).ready(function () {
               $(`#${activeButton}`).removeClass("professor-button-active");
               $(`#${activeButton}`).addClass("professor-button");
             }
+
             activeButton = profId;
             button.addClass('professor-button-active');
             button.removeClass('professor-button');
+
+            const wishlistButton = $(`
+              <button class="add-wishlist" data-id="${profId}">
+                ⭐ Add <b>${professor.professor_name}</b> to Wishlist
+              </button>
+            `);
+            $('#wishlist-container').empty().append(wishlistButton);
           });
+
           $('.professor-buttons').append(button);
         },
         error: function () {
@@ -107,14 +120,13 @@ $(document).ready(function () {
     `);
 
 
-
-      $('.review-container').append(li);
-    }})
-    
+        $('.review-container').append(li);
+      }
+    });
   });
 
   $('#review-form').on('submit', function (e) {
-    e.preventDefault(); 
+    e.preventDefault();
     $('#errorMessages').remove();
     const errorMessages = [];
 
@@ -122,7 +134,7 @@ $(document).ready(function () {
     const professorEmail = $('#professor-email').val().trim();
     const title = $('#review-title').val().trim();
     const totalRating = parseFloat($('#total-rating').val().trim());
-    const difficultyRating = parseFloat($('#difficulty-rating').val().trim()); 
+    const difficultyRating = parseFloat($('#difficulty-rating').val().trim());
     const qualityRating = parseFloat($('#quality-rating').val().trim());
     const reviewContents = $('#review').val().trim();
 
@@ -183,82 +195,128 @@ $(document).ready(function () {
       $('form').append(errorDiv);
       return;
     }
-    const courseCode = classData.course_code;
+
     $.ajax({
-      url: '/professor',
-      type: 'POST',
-      data: {
-        course_code: courseCode,
-        email: professorEmail,
-        professor_name: professorName
-      },
-      success: function (response) {
-        const professorId = response._id;
+      url: 'https://raw.githubusercontent.com/zacanger/profane-words/master/words.json',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        const reviewWords = $('#review').val().split(/\s+/);
+        for (const word of reviewWords) {
+          if (data.includes(word.toLowerCase())) {
+            alert('Please no profanity.');
+            $('#review').val('');
+            return;
+          }
+        }
+        const courseCode = classData.course_code;
         $.ajax({
-          url: `/reviews/${classData._id}`,
+          url: '/professor',
           type: 'POST',
           data: {
-            course_code: classData.course_code,
-            professor_id: professorId,
-            review_title: title,
-            review_total_rating: totalRating,
-            review_difficulty_rating: difficultyRating,
-            review_quality_rating: qualityRating,
-            review_contents: reviewContents,
-            user_name: userData.user_name,
-            review_date: new Date().toISOString().substring(0,10),
-            reviewer_id: userData._id
+            course_code: courseCode,
+            email: professorEmail,
+            professor_name: professorName
           },
           success: function (response) {
-            alert('Review submitted successfully!');
-            $('#review-form')[0].reset();
+            const professorId = response._id;
+            $.ajax({
+              url: `/reviews/${classData._id}`,
+              type: 'POST',
+              data: {
+                course_code: classData.course_code,
+                professor_id: professorId,
+                review_title: title,
+                review_total_rating: totalRating,
+                review_difficulty_rating: difficultyRating,
+                review_quality_rating: qualityRating,
+                review_contents: reviewContents,
+                user_name: userData.user_name,
+                review_date: new Date().toISOString().substring(0, 10),
+                reviewer_id: userData._id
+              },
+              xhrFields: {
+                withCredentials: true
+              },
+              success: function () {
+                alert('Review submitted successfully!');
+                $('#review-form')[0].reset();
+                window.location.reload();
+              },
+              error: function () {
+                alert('Failed to submit review. Please try again.');
+              }
+            });
           },
           error: function () {
-            alert('Failed to submit review. Please try again.');
+            alert('Failed to fetch professor ID. Please try again.');
+          }
+        });
+      }
+    });
+  });
+
+  $('.review-container').on('click', '.like-button, .dislike-button', function () {
+    const button = $(this);
+    const reviewId = button.data('id');
+    const isLike = button.hasClass('like-button');
+    const courseCode = classData.course_code;
+
+    if (!userData) return;
+
+    $.ajax({
+      url: `/reviews/review/${reviewId}`,
+      type: 'GET',
+      success: function (response) {
+        const id = userData._id.toString();
+        const like = isLike ? 1 : 0;
+        let likers = response.likers;
+        const status = likers[id];
+        
+
+        if (like == status) {
+          alert('You cannot ' + (isLike ? 'like' : 'dislike') + ' more than once! Your passion is much appreciated though.');
+          return;
+        }
+
+        if(status != undefined && status != like) {
+        likers[userData._id] = like;
+        }
+        else{
+        likers[userData._id] = like;
+        }
+
+        const likes = Object.values(likers).filter(l => l == 1).length;
+        const dislikes = Object.values(likers).filter(v => v == 0).length;
+
+        const updatedFields = {
+          course_code: courseCode,
+          _rid: reviewId,
+          updatedFields:{
+            likes,
+            dislikes,
+            likers
+          }
+        };
+
+        $.ajax({
+          url: `/reviews/review/${reviewId}`,
+          type: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify(updatedFields),
+          success: function () {
+            $(`.like-button[data-id="${reviewId}"]`).html(`👍 ${likes}`);
+            $(`.dislike-button[data-id="${reviewId}"]`).html(`👎 ${dislikes}`);
+          },
+          error: function () {
+            alert('Failed to update review. Please try again.');
           }
         });
       },
       error: function () {
-        alert('Failed to fetch professor ID. Please try again.');
+        alert('Failed to fetch review data. Please try again.');
       }
     });
-  });
-  $('.review-container').on('click', '.like-button, .dislike-button', function () {
-  if (!userData) return;
-
-  const isLike = $(this).hasClass('like-button');
-  const button = $(this);
-  const reviewId = button.data('id');
-  const reviewCard = button.closest('.review-card');
-  const courseCode = classData.course_code;
-
-  const currentCount = parseInt(button.text().match(/\d+/)[0]);
-
-  const newCount = currentCount + 1;
-
-  const updatedFields = {
-    course_code: courseCode,
-    _rid: reviewId,
-    updatedFields: {}
-  };
-
-  if (isLike) {
-    updatedFields.updatedFields.likes = newCount;
-  } else {
-    updatedFields.updatedFields.dislikes = newCount;
-  }
-
-  $.ajax({
-    url: `/reviews/review/${reviewId}`,
-    type: 'PUT',
-    contentType: 'application/json',
-    data: JSON.stringify(updatedFields),
-    success: function () {
-      button.html((isLike ? '👍 ' : '👎 ') + newCount);
-    },
-    error: function () {
-      alert('Failed to update review. Please try again.');
-    }
   });
 });
   $('.review-container').on('submit', '.comment-form', function (e) {
@@ -311,5 +369,19 @@ $(document).ready(function () {
     });
   });
 
+  $('#wishlist-container').on('click', '.add-wishlist', function() {
+    const button = $(this);
+    const id = button.data('id');
 
+    $.ajax({
+      url: `/professor/${userData._id}/${id}`,
+      method: "POST",
+      success: function(){
+        button.text("✅ Added");
+      },
+      error: function(e){
+        alert(`${userData._id}, ${id}`);
+      }
+    });
+  });
 });

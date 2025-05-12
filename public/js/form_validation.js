@@ -1,33 +1,17 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('signin-form');
-    const registerForm = document.getElementById('signup-form');
+(function () {
+    const signinForm = document.getElementById('signin-form');
+    if (signinForm) {
+        signinForm.addEventListener('submit', (event) => {
+            let user_name = document.getElementById('user_name').value.trim();
+            let password = document.getElementById('password').value.trim();
+            let errorMessage = '';
 
-    function isStevensEmail(email) {
-        return /^[a-zA-Z0-9._%+-]+@stevens\.edu$/.test(email);
+            if(!user_name || password)errorMessage = "Username and Password Required";
+
+            if (errorMessage) {
+                event.preventDefault();
+                alert(errorMessage);
+            }
+        });
     }
-
-    function validateForm(e, formType) {
-        const email = e.target.querySelector('input[name="email"]');
-        const password = e.target.querySelector('input[name="password"]');
-    
-        if (!email || !password) {
-            alert("Email and password are required.");
-             e.preventDefault();
-        return;
-        }
-
-        if (!isStevensEmail(email.value.trim())) {
-            alert("Please use a valid @stevens.edu email.");
-            e.preventDefault();
-        return;
-        }
-    }
-
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => validateForm(e, 'login'));
-    }
-
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => validateForm(e, 'register'));
-    }
-});   
+})();

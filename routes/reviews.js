@@ -14,7 +14,7 @@ router
         const classList = await classData.getAllClasses()
         for(let i = 0; i<classList.length; i++){
             for(let j = 0; j<classList[i].reviews.length; j++){
-                if(classList[i].reviews[j]._id == id) return res.status(200).send(classList[i].reviews[j])
+                if(classList[i].reviews[j]._rid == id) return res.status(200).send(classList[i].reviews[j])
             }
         }
         return res.status(404).send("404: Review not found")
@@ -72,7 +72,6 @@ router
     const _rid = new ObjectId();
     try{
         const newReview = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name, _rid: _rid.toString() })
-        console.log(newReview)
         await userData.addReview(user_name, newReview) //awaiting on this function, update param upon duncan push
         return res.status(200).send(newReview)
 
