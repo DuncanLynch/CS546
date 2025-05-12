@@ -38,27 +38,6 @@ router
         }
 })
 
-/* router.get('/sorted', async (req, res) => {
-  try {
-    const db = req.app.locals.db;
-    const professors = await db.collection('professors').aggregate([
-      {
-        $addFields: {
-          reviewCount: { $size: { $ifNull: ["$reviews", []] } }
-        }
-      },
-      {
-        $sort: { reviewCount: -1 }
-      }
-    ]).toArray();
-
-    res.status(200).render('professorList', { professors });
-  } catch (e) {
-    console.error('Error fetching sorted professors:', e);
-    res.status(500).send("Internal Server Error");
-  }
-});   */
-
 router
 .route('/:id')
 .get(async (req, res) => {
