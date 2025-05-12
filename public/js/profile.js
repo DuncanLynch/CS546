@@ -30,8 +30,8 @@ $(document).ready(function () {
                 </div>
                 <div class="other-info">
                   <div class="other-ratings">
-                    <div><strong>Difficulty:</strong> ${review.review_difficulty_rating}</div>
-                    <div><strong>Quality:</strong> ${review.review_quality_rating}</div>
+                    <div><span class='strong'>Difficulty:</span> ${review.review_difficulty_rating}</div>
+                    <div><span class='strong'>Quality:</span> ${review.review_quality_rating}</div>
                   </div>
                   <div class="review-content">
                     <h4>${review.review_title}</h4>

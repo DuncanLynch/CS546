@@ -565,3 +565,6 @@ form#review-form label {
   text-align: center;
 }
 
+.strong {
+    font-weight: bolder;
+}
