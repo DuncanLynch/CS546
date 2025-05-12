@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'ratemyclassy@gmail.com',
-    pass: 'zmaxaclgndsmjffm' // Use an App Password if using Gmail with 2FA
+    pass: 'zmaxaclgndsmjffm' //  App Password from gmail
   }
 });
 router
