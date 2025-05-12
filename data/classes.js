@@ -1,7 +1,7 @@
 // Imports
 import { ObjectId } from "mongodb";
 import { classes } from "../mongodb/mongoCollections.js";
-import { process_id, validate, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_yyyymmdd_date, validate_number, validate_user_name } from "../validation.js";
+import { process_id, validate, validate_string, validate_user_name, process_numerical_rating, process_course_code, validate_yyyymmdd_date, validate_number } from "../validation.js";
 
 // Data Functions:
 
@@ -78,13 +78,9 @@ export async function deleteClass(id) {
     return result;
 }
 
-export async function addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name}) {
+export async function addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name, _rid}) {
     validate(reviewer_id, validate_string, [process_id]);
     validate(professor_id, validate_string, [process_id]);
-    console.log(user_name);
-    console.log("review_total_rating:", review_total_rating, typeof review_total_rating);
-console.log("review_difficulty_rating:", review_difficulty_rating, typeof review_difficulty_rating);
-console.log("review_quality_rating:", review_quality_rating, typeof review_quality_rating);
     validate(user_name, validate_string, [validate_user_name])
     validate(course_code, validate_string, [process_course_code]);
     validate(review_title, validate_string, []);
@@ -95,7 +91,6 @@ console.log("review_quality_rating:", review_quality_rating, typeof review_quali
     validate(review_total_rating, validate_number, [process_numerical_rating]);
 
 
-    const _ridObj = new ObjectId();
 
     const classCollection = await classes();
     const currentClass = await classCollection.findOne({ course_code });
@@ -107,7 +102,7 @@ console.log("review_quality_rating:", review_quality_rating, typeof review_quali
         {
             $push: {
                 reviews: {
-                    _rid: _ridObj,
+                    _rid,
                     course_code,
                     professor_id,
                     review_title,
@@ -136,7 +131,23 @@ console.log("review_quality_rating:", review_quality_rating, typeof review_quali
     if (!updateResult) throw new Error("Failed to add review");
 
     updateResult._id = updateResult._id.toString();
-    return updateResult;
+    return {
+                    _rid,
+                    course_code,
+                    professor_id,
+                    review_title,
+                    reviewer_id,
+                    reviewer_name: user_name,
+                    review_date,
+                    review_contents,
+                    likes: 0,
+                    dislikes: 0,
+                    likers: [],
+                    review_quality_rating,
+                    review_difficulty_rating,
+                    review_total_rating,
+                    comments: []
+                };
 }
 
 export async function addProfessor(course_code, professor_id) {
@@ -203,29 +214,27 @@ export async function deleteReview(class_id, review_id) {
     return updatedClass;
 }
 
-export async function addComment(classId, reviewId, userId, commentText) {
+export async function addComment(user_name, reviewId, classId, commentText, commentId) {
     classId = validate(classId, validate_string);
     reviewId = validate(reviewId, validate_string);
-    userId = validate(userId, validate_string);
+    user_name = validate(user_name, validate_string, [validate_user_name]);
     commentText = validate(commentText, validate_string);
 
     if (!ObjectId.isValid(classId)) throw new Error("Invalid class ID.");
     if (!ObjectId.isValid(reviewId)) throw new Error("Invalid review ID.");
-    if (!ObjectId.isValid(userId)) throw new Error("Invalid user ID.");
 
     const comment = {
-        _id: new ObjectId(),
-        userId: new ObjectId(userId),
+        _id: commentId,
+        user_name,
         text: commentText.trim(),
-        date: new Date().toISOString()
+        date: new Date().toISOString().substring(0,10)
     };
 
     const classCollection = await classes();
-
     const updateInfo = await classCollection.updateOne(
         {
             _id: new ObjectId(classId),
-            "reviews._rid": new ObjectId(reviewId)
+            "reviews._rid": reviewId
         },
         {
             $push: { "reviews.$.comments": comment }

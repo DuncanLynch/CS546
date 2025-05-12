@@ -3,6 +3,7 @@ import * as userData from '../data/users.js'
 import xss from 'xss';
 import crypto from 'crypto';
 import { ObjectId } from 'mongodb';
+import {validate, validate_string, validate_user_name, validate_password, validate_stevens_email} from "../validation.js"
 const router = express.Router();
 const pendingUsers = new Map();
 
@@ -44,14 +45,13 @@ router
         const user_name = xss(req.body.user_name);
         const password = xss(req.body.password);
         const loginUser = await userData.validateUser(user_name, password); //assuming return value of validate user is the user object
-        console.log(loginUser);
         req.session.user = {
             user_name: loginUser.user_name, 
             _id: loginUser._id.toString(), 
             email: loginUser.email, 
             reviews: loginUser.reviews
         }
-
+        res.locals.user_logged = true;
 
         //2fa here later
 
@@ -69,7 +69,6 @@ router.route('/register')
   .post(async (req, res) => {
 
     let user_name, password, email = null;
-    console.log(req.body)
     try{
       if (!req.body || !(Object.keys(req.body).length === 4)) {
         return res.status(400).send("400: Invalid length of json");

@@ -11,7 +11,7 @@ app.use(
     secret: "This is a secret.. shhh don't tell anyone",
     saveUninitialized: false,
     resave: false,
-    cookie: { maxAge: 60000 }
+    cookie: { maxAge: 1000 * 60 * 60 * 2 }
   })
 );
 const rewriteUnsupportedBrowserMethods = (req, res, next) => {
@@ -22,7 +22,12 @@ const rewriteUnsupportedBrowserMethods = (req, res, next) => {
   next();
 };
 
+
 // Middleware
+app.use((req, res, next) => {
+    res.locals.user_logged = !!req.session.user;
+    next();
+});
 app.use('/class', (req, res, next) => {
   if(req.method === 'POST') return middleware.loggedin(req, res, next, '/') //unsure about redirect may need further altering
   next();
@@ -59,7 +64,7 @@ app.use('/user/signout', (req, res, next) => {
 app.use('/user/profile', (req, res, next) => {
   if(req.method === 'GET' || req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login');
   next();
-
+});
 
 const hbs = exphbs.create({
   helpers: {
