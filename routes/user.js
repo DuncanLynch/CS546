@@ -7,6 +7,14 @@ import {validate, validate_string, validate_user_name, validate_password, valida
 const router = express.Router();
 const pendingUsers = new Map();
 
+import {
+  validate,
+  validate_string,
+  validate_user_name,
+  validate_password,
+  validate_stevens_email
+} from '../validation.js';
+
 router
 .route('/')
 .get(async (req, res) => {
