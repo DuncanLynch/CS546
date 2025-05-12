@@ -42,6 +42,7 @@ router
         return res.status(400).send("400: " + e);
     }
     if(professor_name === null || course_code === null || email === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    console.log("validated post")
         try {
             const cls = await classData.getClassbyCourseCode(course_code);
             const newProfessor = await professorData.createProfessor(professor_name, course_code, email);

@@ -27,7 +27,7 @@ router
         const classList = await classData.getAllClasses()
         for(let i = 0; i<classList.length; i++){
             for(let j = 0; j<classList[i].reviews.length; j++){
-                if(classList[i].reviews[j]._id == id) return res.status(200).send(classList[i].reviews[j])
+                if(classList[i].reviews[j]._rid == id) return res.status(200).send(classList[i].reviews[j])
             }
         }
         return res.status(404).send("404: Review not found")
@@ -152,7 +152,7 @@ router
         const classList = await classData.getAllClasses()
         for(let i = 0; i<classList.length; i++){
             for(let j = 0; j<classList[i].reviews.length; j++){
-                if(classList[i].reviews[j]._id == id) return res.status(200).send(classList[i].reviews[j].comments)
+                if(classList[i].reviews[j]._rid == id) return res.status(200).send(classList[i].reviews[j].comments)
             }
         }
         return res.status(404).send("404: Review not found so can't return comments")
@@ -162,7 +162,7 @@ router
 
 })
 router
-.route('/review/:reviewId/comments/:commentId')
+.route('/review/:reviewId/comments/:commentId')//fix
 .get(async (req, res) => {
     let id, commentId = null;
     try{
@@ -184,7 +184,7 @@ router
         const classList = await classData.getAllClasses()
         for(let i = 0; i<classList.length; i++){
             for(let j = 0; j<classList[i].reviews.length; j++){
-                if(classList[i].reviews[j]._id == id) reviewobj = classList[i].reviews[j]
+                if(classList[i].reviews[j]._rid.toString() == id.toString()) reviewobj = classList[i].reviews[j]
             }
         }
         if(reviewobj === null) return res.status(404).send("404: Review not found so can't return comments")

@@ -46,7 +46,7 @@ app.use((req, res, next) => {
 });
 
 
-// Middleware for login and signout routes
+// Middleware
 app.use('/class', (req, res, next) => {
   if(req.method === 'POST') return middleware.loggedin(req, res, next, '/') //unsure about redirect may need further altering
   next();
@@ -56,7 +56,9 @@ app.use('/class/:id', (req, res, next) => {
   next();
 })
 app.use('/professor', (req, res, next) => {
-  if(req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login')
+  if(req.method === 'POST') {
+     return middleware.loggedin_no_owner_profs(req, res, next, '/')
+  }
   next();
 })
 app.use('/professor/:id', (req, res, next) => {
@@ -71,7 +73,7 @@ app.use('/user/login', (req, res, next) => {
   if(req.method === 'GET' || req.method === 'POST') return middleware.notloggedin(req, res, next, '/user/profile');
   next();
 });
-app.use('/user/login', (req, res, next) => {
+app.use('/user/register', (req, res, next) => {
   if(req.method === 'GET' || req.method === 'POST') return middleware.notloggedin(req, res, next, '/user/profile');
   next();
 });
@@ -80,16 +82,16 @@ app.use('/user/signout', (req, res, next) => {
   next();
 });
 app.use('/user/profile', (req, res, next) => {
-  if(req.method === 'GET' || req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login');
+  if(req.method === 'GET' || req.method === 'POST') return middleware.loggedin(req, res, next, '/');
   next();
 });
 app.use('/reviews/:classId', (req, res, next) => {
-  if(req.method === 'POST') return middleware.loggedin(req, res, next, '/reviews/:classId') //check if userid is found in any of the reviws of that class
+  if(req.method === 'POST') return middleware.loggedin_no_owner(req, res, next, '/')
     next();
 })
 app.use('/reviews//review/:id', (req, res, next) => {
-  if(req.method === 'DELETE') return middleware.loggedin(req, res, next, '/reviews/:classId') //check if userid is in review of that class
-    next();
+  if(req.method === 'DELETE') return middleware.loggedin_owner(req, res, next, '/')
+  next();
 })
 app.use('/reviews/review/:reviewId/comments', (req, res, next) => {
   if(req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login')
