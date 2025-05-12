@@ -1,11 +1,14 @@
-{{#if user_logged}}
-<script>
-  const userData = {{{userJson}}};
-</script>
-{{/if}}
 <script>
   const classData = {{{json class}}};
+  let userData = null;
 </script>
+{{#if user_logged}}
+<script>
+  userData = {{{userJson}}};
+</script>
+{{/if}}
+
+<script src="/public/js/badwords.js"></script>
 <script src="/public/js/clid_script.js"></script>
 
 <div class="class-info">

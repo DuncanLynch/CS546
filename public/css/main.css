@@ -485,6 +485,12 @@ form#review-form label {
   background-color: #f8d7da;
 }
 
+.errorMessages {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+}
+
 .wishlist-container{
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -558,3 +564,4 @@ form#review-form label {
 .already{
   text-align: center;
 }
+

@@ -2,6 +2,8 @@ import express from 'express';
 import * as classData from '../data/classes.js'
 import * as userData from '../data/users.js'
 import xss from 'xss'
+import { ObjectId } from 'mongodb';
+import { validate, validate_user_name, validate_string, process_id } from '../validation.js';
 const router = express.Router();
 
 router
@@ -36,7 +38,8 @@ router
     const course_code = xss(req.body.course_code)
     const updatedFields = req.body.updatedFields
     try{
-        const updatedReview = await classData.updateReview(course_code, rid, updatedFields) 
+        const updatedReview = await classData.updateReview(course_code, rid, updatedFields) ;
+        await userData.updateReview(course_code, rid, updatedFields);
         return res.status(200).send(updatedReview)
     }catch (e){
         console.log(e)
@@ -56,7 +59,6 @@ router
     }
 })
 .post(async (req, res) => {
-    console.log("hi");
     const course_code = xss(req.body.course_code)
     const professor_id = xss(req.body.professor_id)
     const review_title = xss(req.body.review_title)
@@ -67,15 +69,46 @@ router
     const review_difficulty_rating = parseFloat(xss(req.body.review_difficulty_rating))
     const review_total_rating = parseFloat(xss(req.body.review_total_rating))
     const user_name = xss(req.body.user_name)
-    console.log(req.body);
+    const _rid = new ObjectId();
     try{
-        const updateClass = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name});
-        const newReview = await userData.addReview(user_name, updateClass.reviews[updateClass.reviews.length - 1]);
-        return res.status(200).send(newReview);
+        const newReview = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name, _rid: _rid.toString() })
+        await userData.addReview(user_name, newReview) //awaiting on this function, update param upon duncan push
+        return res.status(200).send(newReview)
 
     }catch(e){
         console.log(e);
         return res.status(404).send(e);
     }
 })
-export default router
+router
+.route('/comment/:id')
+.post(async (req, res) => {
+  try {
+    const reviewId = validate(xss(req.params.id), validate_string, [process_id]);
+    const commentText = xss(req.body.commentText);
+    const classId = xss(req.body.classId)
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ error: 'User must be logged in to comment.' });
+    }
+
+    const user_name = validate(req.session.user.user_name, validate_string, [validate_user_name]);
+
+    let userSuccess = false;
+    let classSuccess = false;
+    const commentId = new ObjectId();
+    classSuccess = await classData.addComment(user_name, reviewId, classId, commentText, commentId);
+    userSuccess = await userData.addComment(user_name, reviewId, commentText, commentId);
+
+    if (!userSuccess && !classSuccess) {
+      return res.status(500).json({ error: 'Failed to add comment to both user and class records.' });
+    }
+
+    return res.status(200).json({ message: 'Comment added successfully.'});
+
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({ error: e.message });
+  }
+});
+
+export default router;
