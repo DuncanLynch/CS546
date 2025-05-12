@@ -26,6 +26,20 @@ router
     }
 })
 .post(async (req, res) => {
+    let user_name, password = null;
+    try{
+      if (!req.body || !(Object.keys(req.body).length === 3)) {
+        return res.status(400).send("400: Invalid length of json");
+      }
+    }catch(e){
+      return res.status(500).render("500: " + e)
+    }
+    try{
+        user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
+        password = validate(xss(req.body.password), validate_string, [validate_password])
+    }catch(e){
+        return res.status(400).send("400: " + e)
+    }
     try{
         const user_name = xss(req.body.user_name);
         const password = xss(req.body.password);
@@ -53,9 +67,24 @@ router
 router.route('/register')
   .get((req, res) => res.status(200).render('register'))
   .post(async (req, res) => {
-    const user_name = xss(req.body.user_name);
-    const password = xss(req.body.password);
-    const email = xss(req.body.email);
+
+    let user_name, password, email = null;
+    console.log(req.body)
+    try{
+      if (!req.body || !(Object.keys(req.body).length === 4)) {
+        return res.status(400).send("400: Invalid length of json");
+      }
+    }catch(e){
+      return res.status(500).render("500: " + e)
+    }
+    try{
+      user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
+      password = validate(xss(req.body.password), validate_string, [validate_password])
+      email = validate(xss(req.body.email), validate_string, [validate_stevens_email])
+    }catch(e){
+      return res.status(400).send("400: " + e)
+    }
+    if(user_name === null || password === null || email === null) return res.status(500).send("500: One or more inputs was not set in validation")
 
     try {
       /* const verificationCode = crypto.randomInt(100000, 999999).toString();
