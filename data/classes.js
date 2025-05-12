@@ -72,14 +72,13 @@ export async function deleteClass(id) {
     const _id = new ObjectId(id);
 
     const classCollection = await classes();
-    const result = await classCollection.deleteOne({ _id });
-    if (result.deletedCount === 0) throw new Error("Failed to delete class");
+    const result = await classCollection.findOneAndDelete({ _id });
+    if (!result) throw new Error("Failed to delete class");
 
-    return true;
+    return result;
 }
 
-export async function addReview(class_id, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, likes, dislikes, review_quality_rating, review_difficulty_rating, review_total_rating, _rid, reviewer_name) {
-    validate(class_id, validate_string, [process_id]);
+export async function addReview(course_code, professor_id, review_title, reviewer_id, review_date, review_contents, likes, dislikes, review_quality_rating, review_difficulty_rating, review_total_rating, _rid, reviewer_name) {
     validate(reviewer_id, validate_string, [process_id]);
     validate(professor_id, validate_string, [process_id]);
     validate(_rid, validate_string, [process_id]);
@@ -95,16 +94,15 @@ export async function addReview(class_id, course_code, professor_id, review_titl
     validate(review_total_rating, validate_number, [process_numerical_rating]);
 
 
-    const _id = new ObjectId(class_id);
     const _ridObj = new ObjectId(_rid);
 
     const classCollection = await classes();
-    const currentClass = await classCollection.findOne({ _id });
+    const currentClass = await classCollection.findOne({ course_code });
     const tr = (review_total_rating + currentClass.class_total_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
     const dr = (review_difficulty_rating + currentClass.class_difficulty_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
     const qr = (review_quality_rating + currentClass.class_quality_rating * currentClass.reviews.length) / (currentClass.reviews.length + 1)
     const updateResult = await classCollection.findOneAndUpdate(
-        { _id },
+        { course_code },
         {
             $push: {
                 reviews: {
@@ -139,17 +137,15 @@ export async function addReview(class_id, course_code, professor_id, review_titl
     return updateResult;
 }
 
-export async function addProfessor(class_id, professor_id) {
-    validate(class_id, validate_string, [process_id]);
+export async function addProfessor(course_code, professor_id) {
+    validate(course_code, validate_string, [process_course_code]);
     validate(professor_id, validate_string, [process_id]);
-    const _id = new ObjectId(class_id);
 
     const classCollection = await classes();
     const updateResult = await classCollection.updateOne(
-        { _id },
+        { course_code },
         { $addToSet: { professors: professor_id } }
     );
-
     if (updateResult.modifiedCount === 0) throw new Error("Failed to add professor");
 
     return true;
@@ -185,10 +181,9 @@ export async function updateReview(class_id, reviewer_id, review_date, updatedFi
     return updatedClass;
 }
 
-export async function deleteReview(class_id, reviewer_id, review_date) {
+export async function deleteReview(class_id, review_id) {
     validate(class_id, validate_string, [process_id]);
-    validate(reviewer_id, validate_string, [process_id]);
-    validate(review_date, validate_string, [validate_mmddyyyy_date]);
+    validate(review_id, validate_string, [process_id]);
     const _id = new ObjectId(class_id);
 
     const classCollection = await classes();
@@ -197,13 +192,11 @@ export async function deleteReview(class_id, reviewer_id, review_date) {
         {
             $pull: {
                 reviews: {
-                    reviewer_id: reviewer_id,
-                    review_date: review_date
+                    _rid: new ObjectId(review_id),
                 }
             }
         }
     );
-
     if (updateResult.modifiedCount === 0) {
         throw new Error("Failed to delete review: review not found.");
     }

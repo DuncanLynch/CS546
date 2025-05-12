@@ -1,6 +1,6 @@
 export const login = (req, res, next) => {
     if (req.session.user) {
-        return res.redirect('/homepage');
+        return res.redirect('/');
     }
     next();
 };
@@ -9,7 +9,7 @@ export const login = (req, res, next) => {
 
 export const signout = (req, res, next) => {
     if (!req.session.user) {
-      return res.redirect('/login');
+      return res.redirect('/user/login');
     }
     next();
 };

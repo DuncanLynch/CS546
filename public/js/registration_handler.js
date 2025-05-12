@@ -26,12 +26,13 @@ $(document).ready(function() {
       }
   
       if (!isValid) {
-        $('form').prepend('<div id="errorMessages" style="color: red;"></div>');
+        $('form').append('<div id="errorMessages" style="color: red;"></div>');
         errorMessages.forEach(msg => {
           $('#errorMessages').append('<p>' + msg + '</p>');
         });
         return;
       }
+      console.log(isValid);
       $.ajax({
         url: '/user/register',
         type: 'POST',

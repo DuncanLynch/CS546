@@ -44,7 +44,7 @@ router
         return res.status(200).redirect('/user/profile');
         //return res.status(200).send(loginUser)
     }catch(e){
-        return res.status(500).render("500: " + e) //update error
+        return res.status(500).json("500: " + e) //update error
     }
 
 })
