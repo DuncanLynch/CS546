@@ -87,6 +87,7 @@ router
     const reviewId = validate(xss(req.params.id), validate_string, [process_id]);
     const commentText = xss(req.body.commentText);
     const classId = xss(req.body.classId)
+    const reviewer = xss(req.body.reviewer)
     if (!req.session || !req.session.user) {
       return res.status(401).json({ error: 'User must be logged in to comment.' });
     }
@@ -97,7 +98,7 @@ router
     let classSuccess = false;
     const commentId = new ObjectId();
     classSuccess = await classData.addComment(user_name, reviewId, classId, commentText, commentId);
-    userSuccess = await userData.addComment(user_name, reviewId, commentText, commentId);
+    userSuccess = await userData.addComment(user_name, reviewId, commentText, commentId, reviewer);
 
     if (!userSuccess && !classSuccess) {
       return res.status(500).json({ error: 'Failed to add comment to both user and class records.' });

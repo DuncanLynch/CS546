@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { users } from "../mongodb/mongoCollections.js";
 import { profs } from "../mongodb/mongoCollections.js";
 import * as profData from "./professors.js"
-import { validate, validate_string, validate_password, validate_stevens_email, process_id, validate_yyyymmdd_date, validate_user_name } from "../validation.js";
+import { validate, validate_string, validate_password, validate_stevens_email, process_id, validate_yyyymmdd_date, process_course_code, validate_user_name } from "../validation.js";
 
 // Constants
 const SALT_ROUNDS = 10;
@@ -188,7 +188,7 @@ export async function addWishlist(user_id, prof_id){
     );
     
     if (result.modifiedCount === 0) {
-        throw new Error("Wishlist not updated.");
+        return false;
     }
 
   return true;
@@ -206,8 +206,9 @@ export async function getWishlist(user_id){
     return user.wishlist;
 }
 
-export async function addComment(user_name, reviewId, commentText, commentId) {
+export async function addComment(user_name, reviewId, commentText, commentId, reviewer) {
     user_name = validate(user_name, validate_string, [validate_user_name]);
+    reviewer = validate(reviewer, validate_string, [validate_user_name]);
     reviewId = validate(reviewId, validate_string, [process_id]);
     commentText = validate(commentText, validate_string);
 
@@ -224,7 +225,7 @@ export async function addComment(user_name, reviewId, commentText, commentId) {
 
     const updateInfo = await userCollection.updateOne(
         {
-            user_name,
+            user_name: reviewer,
             "reviews._rid": reviewId
         },
         {
@@ -233,7 +234,7 @@ export async function addComment(user_name, reviewId, commentText, commentId) {
     );
 
     if (updateInfo.modifiedCount === 0) {
-        throw new Error("Failed to add comment. Class or review may not exist.");
+        throw new Error("Failed to add comment. User or review may not exist.");
     }
 
     return comment;
