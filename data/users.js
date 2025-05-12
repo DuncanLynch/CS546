@@ -2,7 +2,7 @@
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 import { users } from "../mongodb/mongoCollections.js";
-import { validate, validate_string, validate_password, validate_stevens_email, process_id, validate_mmddyyyy_date, validate_user_name } from "../validation.js";
+import { validate, validate_string, validate_password, validate_stevens_email, process_id, validate_yyyymmdd_date, validate_user_name } from "../validation.js";
 
 // Constants
 const SALT_ROUNDS = 10;
@@ -92,7 +92,7 @@ export async function updateReview(class_id, review_id, updatedFields) {
     const _rid = new ObjectId(review_id);
 
     const userCollection = await users();
-
+    console.log(updatedFields)
     const updateResult = await userCollection.updateOne(
         {
             _id,

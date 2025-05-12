@@ -1,6 +1,6 @@
-{{#if user}}
+{{#if user_logged}}
 <script>
-  const userData = {{userJson}};
+  const userData = {{{userJson}}};
 </script>
 {{/if}}
 <script>
@@ -76,6 +76,7 @@
         </div>
       </div>
       <div class="professor-buttons">
+        <button id="0" class="professor-button-active">All Professors</button>
       </div>
       <ul class="review-container">
       </ul>

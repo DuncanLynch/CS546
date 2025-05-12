@@ -1,7 +1,7 @@
 // Imports
 import { ObjectId } from "mongodb";
 import { classes } from "../mongodb/mongoCollections.js";
-import { process_id, validate, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_mmddyyyy_date, validate_number, validate_user_name } from "../validation.js";
+import { process_id, validate, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_yyyymmdd_date, validate_number, validate_user_name } from "../validation.js";
 
 // Data Functions:
 
@@ -78,23 +78,24 @@ export async function deleteClass(id) {
     return result;
 }
 
-export async function addReview(course_code, professor_id, review_title, reviewer_id, review_date, review_contents, likes, dislikes, review_quality_rating, review_difficulty_rating, review_total_rating, _rid, reviewer_name) {
+export async function addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name}) {
     validate(reviewer_id, validate_string, [process_id]);
     validate(professor_id, validate_string, [process_id]);
-    validate(_rid, validate_string, [process_id]);
-    validate(reviewer_name, validate_string, [validate_user_name])
+    console.log(user_name);
+    console.log("review_total_rating:", review_total_rating, typeof review_total_rating);
+console.log("review_difficulty_rating:", review_difficulty_rating, typeof review_difficulty_rating);
+console.log("review_quality_rating:", review_quality_rating, typeof review_quality_rating);
+    validate(user_name, validate_string, [validate_user_name])
     validate(course_code, validate_string, [process_course_code]);
     validate(review_title, validate_string, []);
-    validate(review_date, validate_string, [validate_mmddyyyy_date]);
+    validate(review_date, validate_string, [validate_yyyymmdd_date]);
     validate(review_contents, validate_string, []);
-    validate(likes, validate_number, [process_unsignedint]);
-    validate(dislikes, validate_number, [process_unsignedint]);
     validate(review_quality_rating, validate_number, [process_numerical_rating]);
     validate(review_difficulty_rating, validate_number, [process_numerical_rating]);
     validate(review_total_rating, validate_number, [process_numerical_rating]);
 
 
-    const _ridObj = new ObjectId(_rid);
+    const _ridObj = new ObjectId();
 
     const classCollection = await classes();
     const currentClass = await classCollection.findOne({ course_code });
@@ -111,11 +112,12 @@ export async function addReview(course_code, professor_id, review_title, reviewe
                     professor_id,
                     review_title,
                     reviewer_id,
-                    reviewer_name,
+                    reviewer_name: user_name,
                     review_date,
                     review_contents,
-                    likes,
-                    dislikes,
+                    likes: 0,
+                    dislikes: 0,
+                    likers: [],
                     review_quality_rating,
                     review_difficulty_rating,
                     review_total_rating,
@@ -146,24 +148,19 @@ export async function addProfessor(course_code, professor_id) {
         { course_code },
         { $addToSet: { professors: professor_id } }
     );
-    if (updateResult.modifiedCount === 0) throw new Error("Failed to add professor");
+    if (updateResult.matchedCount === 0) throw new Error("Failed to add professor");
 
     return true;
 }
 
-export async function updateReview(class_id, reviewer_id, review_date, updatedFields) {
-    validate(class_id, validate_string, [process_id]);
-    validate(reviewer_id, validate_string, [process_id]);
-    validate(review_date, validate_string, [validate_mmddyyyy_date]);
-    const _id = new ObjectId(class_id);
-
+export async function updateReview(course_code, rid, updatedFields) {
+    validate(course_code, validate_string, [process_course_code]);
+    validate(rid, validate_string, [process_id]);
     const classCollection = await classes();
-
     const updateResult = await classCollection.updateOne(
         {
-            _id,
-            "reviews.reviewer_id": reviewer_id,
-            "reviews.review_date": review_date
+            course_code,
+            "reviews._rid": new ObjectId(rid),
         },
         {
             $set: Object.fromEntries(
@@ -176,7 +173,7 @@ export async function updateReview(class_id, reviewer_id, review_date, updatedFi
         throw new Error("Failed to update review: review not found or no changes made.");
     }
 
-    const updatedClass = await classCollection.findOne({ _id });
+    const updatedClass = await classCollection.findOne({ course_code });
     updatedClass._id = updatedClass._id.toString();
     return updatedClass;
 }
