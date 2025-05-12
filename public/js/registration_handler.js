@@ -32,7 +32,6 @@ $(document).ready(function() {
         });
         return;
       }
-      console.log(isValid);
       $.ajax({
         url: '/user/register',
         type: 'POST',

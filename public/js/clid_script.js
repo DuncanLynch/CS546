@@ -1,5 +1,16 @@
 $(document).ready(function () {
-  let activeButton = null;
+  let activeButton = "0";
+  $('#0').on('click', function () {
+  $('.review-container li').show(); // Show all reviews
+
+  if (activeButton) {
+    $(`#${activeButton}`).removeClass("professor-button-active");
+    $(`#${activeButton}`).addClass("professor-button");
+  }
+  activeButton = "0";
+  $('#0').addClass('professor-button-active');
+  $('#0').removeClass('professor-button');
+  });
   if (classData.professors && classData.professors.length > 0) {
     $('.prof-rev').removeAttr('hidden');
 
@@ -10,7 +21,7 @@ $(document).ready(function () {
         success: function (professor) {
           const button = $('<button>')
             .text(professor.professor_name)
-            .attr('data-id', profId)
+            .attr('id', profId)
             .addClass('professor-button');
           button.on('click', function () {
             $('.review-container li').each(function () {
@@ -44,13 +55,47 @@ $(document).ready(function () {
   }
 
   classData.reviews.forEach(function (review) {
-    const li = $('<li>').data('professor-id', review.professor_id)
-      .append(
-        `<p>Title: ${review.review_title}</p>
-         <p>Rating: ${review.review_total_rating}</p>
-         <p>Review: ${review.review_contents}</p>`
-      );
-    $('.review-container').append(li);
+    const prof = $.ajax({url: `/professor/${review.professor_id}`, type: "GET", success: function (response) {
+      const li = $('<li>').data('professor-id', review.professor_id)
+      .append(`
+        <div class="review-card">
+          <div class="review-header">
+            <div class="reviewer-info">
+              <p><strong>${review.reviewer_name}</strong></p>
+              <p>Professor ${response.professor_name} (${response.email})</p>
+            </div>
+            <div class="review-date">
+              <p>${review.review_date}</p>
+            </div>
+          </div>
+          <div class="review-body">
+            <div class="overall-rating">
+              <div class="rating-badge">${review.review_total_rating}</div>
+              <p>Overall</p>
+            </div>
+            <div class="other-info">
+              <div class="other-ratings">
+                <div><strong>Difficulty:</strong> ${review.review_difficulty_rating}</div>
+                <div><strong>Quality:</strong> ${review.review_quality_rating}</div>
+              </div>
+              <div class="review-content">
+                <h4>${review.review_title}</h4>
+                <p>${review.review_contents}</p>
+              </div>
+            </div>
+          </div>
+          <div class="review-footer">
+            <button class="like-button" data-id="${review._rid}">👍 ${review.likes || 0}</button>
+            <button class="dislike-button" data-id="${review._rid}">👎 ${review.dislikes || 0}</button>
+          </div>
+        </div>
+      `);
+
+
+
+      $('.review-container').append(li);
+    }})
+    
   });
 
   $('#review-form').on('submit', function (e) {
@@ -113,10 +158,11 @@ $(document).ready(function () {
         professor_name: professorName
       },
       success: function (response) {
-        const professorId = response.professor_id;
         console.log(response);
+        const professorId = response._id;
+        console.log("Professor added!");
         $.ajax({
-          url: `/review/${classData._id}`,
+          url: `/reviews/${classData._id}`,
           type: 'POST',
           data: {
             course_code: classData.course_code,
@@ -127,11 +173,11 @@ $(document).ready(function () {
             review_quality_rating: qualityRating,
             review_contents: reviewContents,
             user_name: userData.user_name,
-            review_date: new Date().toISOString(),
+            review_date: new Date().toISOString().substring(0,10),
             reviewer_id: userData._id
           },
           success: function (response) {
-            console.log(response);
+            console.log("Review added!");
             alert('Review submitted successfully!');
             $('#review-form')[0].reset();
           },
@@ -145,4 +191,44 @@ $(document).ready(function () {
       }
     });
   });
+  $('.review-container').on('click', '.like-button, .dislike-button', function () {
+  if (!userData) return;
+
+  const isLike = $(this).hasClass('like-button');
+  const button = $(this);
+  const reviewId = button.data('id');
+  const reviewCard = button.closest('.review-card');
+  const courseCode = classData.course_code;
+
+  const currentCount = parseInt(button.text().match(/\d+/)[0]);
+
+  const newCount = currentCount + 1;
+
+  const updatedFields = {
+    course_code: courseCode,
+    _rid: reviewId,
+    updatedFields: {}
+  };
+
+  if (isLike) {
+    updatedFields.updatedFields.likes = newCount;
+  } else {
+    updatedFields.updatedFields.dislikes = newCount;
+  }
+
+  $.ajax({
+    url: `/reviews/review/${reviewId}`,
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify(updatedFields),
+    success: function () {
+      button.html((isLike ? '👍 ' : '👎 ') + newCount);
+    },
+    error: function () {
+      alert('Failed to update review. Please try again.');
+    }
+  });
+});
+
+
 });

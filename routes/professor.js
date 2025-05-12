@@ -8,6 +8,7 @@ router
 .route('/')
 .get(async (req, res) => {
     try{
+        console.log("GET Caught!");
         if (!(Object.keys(req.body).length === 0)) {
             return res.status(400).send("400: Route was not expecting json");
         }
@@ -23,18 +24,18 @@ router
     }
 })
 .post(async (req, res) => {
+    console.log("POST Caught!");
         const professor_name = xss(req.body.professor_name)
         const course_code= xss(req.body.course_code)
         const email = xss(req.body.email)
         try {
             const cls = await classData.getClassbyCourseCode(course_code);
-            
-            const newProfessor = await professorData.createProfessor(professor_name, ObjectId.toString(cls._id), email)
-            await classData.addProfessor(cls._id.toString(), newProfessor._id)
-            console.log(newProfessor);
+            const newProfessor = await professorData.createProfessor(professor_name, course_code, email);
+            await classData.addProfessor(course_code, newProfessor._id)
             return res.status(200).json(newProfessor);
         } catch (e) {
             // Something went wrong with the server!
+            console.log(e);
             return res.status(500).send("500: " + e);
         }
 })
@@ -59,4 +60,4 @@ router
         return res.status(404).send("404: "+ e)
     }
 })
-export default router
+export default router;

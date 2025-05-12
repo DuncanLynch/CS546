@@ -1,6 +1,7 @@
 import express from 'express';
 import * as classData from '../data/classes.js'
 import * as userData from '../data/users.js'
+import xss from 'xss'
 const router = express.Router();
 
 router
@@ -31,22 +32,14 @@ router
 
 })
 .put(async (req, res) => {
-    const id = xss(req.params.id)
+    const rid = xss(req.params.id)
     const course_code = xss(req.body.course_code)
-    const professor_id = xss(req.body.professor_id)
-    const review_title = xss(req.body.review_title)
-    const reviewer_id = xss(req.body.reviewer_id)
-    const review_date = xss(req.body.review_date)
-    const review_contents = xss(req.body.review_contents)
-    const likes = xss(req.body.likes)
-    const dislikes = xss(req.body.dislikes)
-    const review_quality_rating = xss(req.bodyreview_quality_rating)
-    const review_difficulty_rating = xss(req.body.review_difficulty_rating)
-    const review_total_rating = xss(req.body.review_total_rating)
+    const updatedFields = req.body.updatedFields
     try{
-        const updatedReview = await classData.updateReview(id, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, likes, dislikes, review_quality_rating, review_difficulty_rating, review_total_rating)//waiting on this function
+        const updatedReview = await classData.updateReview(course_code, rid, updatedFields) 
         return res.status(200).send(updatedReview)
     }catch (e){
+        console.log(e)
         return res.status(404).send("404: "+ e)
     }
 })
@@ -63,22 +56,25 @@ router
     }
 })
 .post(async (req, res) => {
+    console.log("hi");
     const course_code = xss(req.body.course_code)
     const professor_id = xss(req.body.professor_id)
     const review_title = xss(req.body.review_title)
     const reviewer_id = xss(req.body.reviewer_id)
     const review_date = xss(req.body.review_date) 
     const review_contents = xss(req.body.review_contents) 
-    const review_quality_rating = xss(req.body.review_quality_rating)
-    const review_difficulty_rating = xss(req.body.review_difficulty_rating)
-    const review_total_rating = xss(req.body.review_total_rating)
-    const user_name = xss(req.session.user_name)
+    const review_quality_rating = parseFloat(xss(req.body.review_quality_rating))
+    const review_difficulty_rating = parseFloat(xss(req.body.review_difficulty_rating))
+    const review_total_rating = parseFloat(xss(req.body.review_total_rating))
+    const user_name = xss(req.body.user_name)
+    console.log(req.body);
     try{
-        const newReview = await classData.addReview(course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating)
+        const newReview = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name})
         await userData.addReview(user_name, newReview) //awaiting on this function, update param upon duncan push
         return res.status(200).send(newReview)
 
     }catch(e){
+        console.log(e);
         return res.status(404).send(e);
     }
 })
