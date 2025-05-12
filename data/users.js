@@ -24,7 +24,7 @@ export async function createUser(user_name, password, email) {
         user_name,
         hashed_password: hashedPassword,
         email,
-        reviews: [] // optional field to hold reviews
+        reviews: {} // optional field to hold reviews
     };
 
     const insertResult = await userCollection.insertOne(newUser);

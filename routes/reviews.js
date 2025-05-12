@@ -12,7 +12,7 @@ router
         const classList = await classData.getAllClasses()
         for(let i = 0; i<classList.length; i++){
             for(let j = 0; j<classList[i].reviews.length; j++){
-                if(classList[i].reviews[j]._id == id) return res.status(200).send(classList[i].reviews[j])
+                if(classList[i].reviews[j]._rid == id) return res.status(200).send(classList[i].reviews[j])
             }
         }
         return res.status(404).send("404: Review not found")

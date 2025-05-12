@@ -36,7 +36,7 @@ app.use(
     secret: "This is a secret.. shhh don't tell anyone",
     saveUninitialized: false,
     resave: false,
-    cookie: { maxAge: 60000 }
+    cookie: { maxAge: 60000 * 30 } // longer session for testing
   })
 );
 // Middleware to reload the buttons in the if else in the layout handlebar

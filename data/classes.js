@@ -117,7 +117,7 @@ console.log("review_quality_rating:", review_quality_rating, typeof review_quali
                     review_contents,
                     likes: 0,
                     dislikes: 0,
-                    likers: [],
+                    likers: {},
                     review_quality_rating,
                     review_difficulty_rating,
                     review_total_rating,
@@ -169,8 +169,11 @@ export async function updateReview(course_code, rid, updatedFields) {
         }
     );
 
-    if (updateResult.modifiedCount === 0) {
-        throw new Error("Failed to update review: review not found or no changes made.");
+    if (!updateResult) {
+        throw new Error("Failed to update review: review not found.");
+    }
+    if (updateResult.modifiedCount == 0){
+        return {updated: false};
     }
 
     const updatedClass = await classCollection.findOne({ course_code });

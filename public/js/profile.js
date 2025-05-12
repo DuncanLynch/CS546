@@ -2,7 +2,7 @@ $(document).ready(function () {
   const container = $('.user-review-container');
 
   if (!userData || !userData.reviews || userData.reviews.length === 0) {
-    container.append('<p>You have not written any reviews yet.</p>');
+    container.append('<p>No reviews. yet :)</p>');
     return;
   }
 
