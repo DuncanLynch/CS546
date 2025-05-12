@@ -56,40 +56,55 @@ $(document).ready(function () {
 
   classData.reviews.forEach(function (review) {
     const prof = $.ajax({url: `/professor/${review.professor_id}`, type: "GET", success: function (response) {
-      const li = $('<li>').data('professor-id', review.professor_id)
-      .append(`
-        <div class="review-card">
-          <div class="review-header">
-            <div class="reviewer-info">
-              <p><strong>${review.reviewer_name}</strong></p>
-              <p>Professor ${response.professor_name} (${response.email})</p>
-            </div>
-            <div class="review-date">
-              <p>${review.review_date}</p>
-            </div>
+    const commentHTML = (review.comments || []).map(comment => `
+      <div class="comment">
+        <p><strong>${comment.user_name}</strong> (${new Date(comment.date).toLocaleDateString()}):</p>
+        <p>${comment.text}</p>
+      </div>
+    `).join('');
+
+    const li = $('<li>').data('professor-id', review.professor_id)
+    .append(`
+      <div class="review-card">
+        <div class="review-header">
+          <div class="reviewer-info">
+            <p><strong>${review.reviewer_name}</strong></p>
+            <p>Professor ${response.professor_name} (${response.email})</p>
           </div>
-          <div class="review-body">
-            <div class="overall-rating">
-              <div class="rating-badge">${review.review_total_rating}</div>
-              <p>Overall</p>
-            </div>
-            <div class="other-info">
-              <div class="other-ratings">
-                <div><strong>Difficulty:</strong> ${review.review_difficulty_rating}</div>
-                <div><strong>Quality:</strong> ${review.review_quality_rating}</div>
-              </div>
-              <div class="review-content">
-                <h4>${review.review_title}</h4>
-                <p>${review.review_contents}</p>
-              </div>
-            </div>
-          </div>
-          <div class="review-footer">
-            <button class="like-button" data-id="${review._rid}">👍 ${review.likes || 0}</button>
-            <button class="dislike-button" data-id="${review._rid}">👎 ${review.dislikes || 0}</button>
+          <div class="review-date">
+            <p>${review.review_date}</p>
           </div>
         </div>
-      `);
+        <div class="review-body">
+          <div class="overall-rating">
+            <div class="rating-badge">${review.review_total_rating}</div>
+            <p>Overall</p>
+          </div>
+          <div class="other-info">
+            <div class="other-ratings">
+              <div><strong>Difficulty:</strong> ${review.review_difficulty_rating}</div>
+              <div><strong>Quality:</strong> ${review.review_quality_rating}</div>
+            </div>
+            <div class="review-content">
+              <h4>${review.review_title}</h4>
+              <p>${review.review_contents}</p>
+            </div>
+          </div>
+        </div>
+        <div class="review-footer">
+          <button class="like-button" data-id="${review._rid}">👍 ${review.likes || 0}</button>
+          <button class="dislike-button" data-id="${review._rid}">👎 ${review.dislikes || 0}</button>
+        </div>
+        <div class="comments-section">
+          <h5>Comments</h5>
+          ${commentHTML || "<p>No comments yet.</p>"}
+          <form class="comment-form" id="${review._rid}">
+            <input type="text" name="commentText" placeholder="Add a comment" required />
+            <button type="submit">${userData ? 'Post' : 'You Must Be Logged in to Post A Comment!'}</button>
+          </form>
+        </div>
+      </div>
+    `);
 
 
 
@@ -111,17 +126,40 @@ $(document).ready(function () {
     const qualityRating = parseFloat($('#quality-rating').val().trim());
     const reviewContents = $('#review').val().trim();
 
-    if (!professorName) {
-      errorMessages.push('Professor name is required.');
+    const nameParts = professorName.split(" ");
+    const nameRegex = /^[A-Z][a-z]+$/;
+    if (
+      nameParts.length !== 2 ||
+      !nameRegex.test(nameParts[0]) ||
+      !nameRegex.test(nameParts[1])
+    ) {
+      errorMessages.push("Professor name must be in 'First Last' format with capitalization.");
     }
 
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!professorEmail || !emailRegex.test(professorEmail)) {
-      errorMessages.push('A valid professor email is required.');
+    const stevensRegex = /^[a-zA-Z0-9._%+-]+@stevens\.edu$/;
+    if (!stevensRegex.test(professorEmail)) {
+      errorMessages.push("Email must be a valid stevens.edu address.");
     }
+
+    const checkBadWords = (text) => {
+      const lowerText = text.toLowerCase();
+      return bad_words.some((word) => lowerText.includes(word));
+    };
+
+    if (checkBadWords(title)) {
+      errorMessages.push("Review title contains inappropriate language.");
+    }
+    if (checkBadWords(reviewContents)) {
+      errorMessages.push("Review content contains inappropriate language.");
+    }
+
 
     if (!title) {
       errorMessages.push('Review title is required.');
+    }
+
+    if (!reviewContents) {
+        errorMessages.push('Review contents are required.');
     }
 
     if (isNaN(totalRating) || totalRating < 1 || totalRating > 5) {
@@ -136,16 +174,13 @@ $(document).ready(function () {
       errorMessages.push('Quality rating must be a number between 1 and 5.');
     }
 
-    if (!reviewContents) {
-      errorMessages.push('Review contents are required.');
-    }
-
+ 
     if (errorMessages.length > 0) {
-      const errorDiv = $('<div id="errorMessages" style="color: red;">');
+      const errorDiv = $('<div id="errorMessages">');
       errorMessages.forEach(function (msg) {
-        errorDiv.append('<p>' + msg + '</p>');
+        errorDiv.append(`<p class='error'>'${msg}'</p>`);
       });
-      $('form').prepend(errorDiv);
+      $('form').append(errorDiv);
       return;
     }
     const courseCode = classData.course_code;
@@ -158,9 +193,7 @@ $(document).ready(function () {
         professor_name: professorName
       },
       success: function (response) {
-        console.log(response);
         const professorId = response._id;
-        console.log("Professor added!");
         $.ajax({
           url: `/reviews/${classData._id}`,
           type: 'POST',
@@ -177,7 +210,6 @@ $(document).ready(function () {
             reviewer_id: userData._id
           },
           success: function (response) {
-            console.log("Review added!");
             alert('Review submitted successfully!');
             $('#review-form')[0].reset();
           },
@@ -229,6 +261,55 @@ $(document).ready(function () {
     }
   });
 });
+  $('.review-container').on('submit', '.comment-form', function (e) {
+    e.preventDefault();
+
+    if (!userData) {
+      return;
+    }
+
+    const form = $(this);
+    const reviewId = form.attr('id');
+    const commentText = form.find('input[name="commentText"]').val().trim();
+
+    if (!commentText) return;
+    const checkBadWords = (text) => {
+      const lowerText = text.toLowerCase();
+      return bad_words.some((word) => lowerText.includes(word));
+    };
+    let errorMessages = [];
+    if (checkBadWords(commentText)) {
+      errorMessages.push("Comment contains inappropriate language.");
+    }
+    if (errorMessages.length > 0) {
+      errorMessages.forEach(function (msg) {
+        errorDiv.append(`<p class='error'>'${msg}'</p>`);
+      });
+    }
+    $.ajax({
+      url: `/reviews/comment/${reviewId}`,
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        classId: classData._id,
+        commentText: commentText, 
+      }),
+      success: function (newComment) {
+        
+        const commentHTML = `
+          <div class="comment">
+            <p><strong>${userData.user_name}</strong> (${new Date().toISOString().substring(0,10)}):</p>
+            <p>${commentText}</p>
+          </div>
+        `;
+        form.before(commentHTML);
+        form[0].reset();
+      },
+      error: function (error) {
+        alert(`Failed to post comment.`);
+      }
+    });
+  });
 
 
 });
