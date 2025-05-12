@@ -4,7 +4,7 @@ import * as profData from '../data/professors.js';
 import { ObjectId } from "mongodb";
 async function runTests() {
     try {
-        // users
+        /*// users
         const user = await userData.createUser("testuser", "Password123!", "testuser@stevens.edu");
         console.log("User created:", user);
 
@@ -19,11 +19,27 @@ async function runTests() {
 
 
 
-        // professors
-        const prof = await profData.createProfessor("Dr Test", "dummycourseid0000000000000000", "testprof@stevens.edu");
-        console.log("Professor created:", prof);
-
-        const fetchedProf = await profData.getProfessorById(prof._id);
+        */// professors
+        //const prof = await profData.createProfessor("Patrick Hill", "CS 546", "testprof@stevens.edu");
+        //console.log("Professor created:", prof);
+        const review = await classData.addReview(
+            "681fd1060ba19622910cc560",
+            "CS 546",
+            "6820266da051231ecf998327",
+            "Great class!",
+            "681fb7bb47cc36c16d4b3db9",
+            "05/11/2025",
+            "Learned a lot!",
+            10,
+            0,
+            5,
+            4,
+            4.5,
+            new ObjectId().toString(),
+            "hypadef"
+        );
+        console.log(review);
+        /* const fetchedProf = await profData.getProfessorById(prof._id);
         console.log("Professor fetched:", fetchedProf);
 
         const allProfs = await profData.getAllProfessors();
@@ -91,7 +107,7 @@ async function runTests() {
         console.log("User deleted:", deletedUser);
 
         const deletedClass = await classData.deleteClass(cls._id);
-        console.log("Class deleted:", deletedClass);
+        console.log("Class deleted:", deletedClass);*/
     } catch (error) {
         console.error("Test failed:", error);
     }

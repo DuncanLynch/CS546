@@ -63,7 +63,6 @@ router
     }
 })
 .post(async (req, res) => {
-    const classId = xss(req.params.id)
     const course_code = xss(req.body.course_code)
     const professor_id = xss(req.body.professor_id)
     const review_title = xss(req.body.review_title)
@@ -75,7 +74,7 @@ router
     const review_total_rating = xss(req.body.review_total_rating)
     const user_name = xss(req.session.user_name)
     try{
-        const newReview = await classData.addReview(classId, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating)
+        const newReview = await classData.addReview(course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating)
         await userData.addReview(user_name, newReview) //awaiting on this function, update param upon duncan push
         return res.status(200).send(newReview)
 

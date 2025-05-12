@@ -13,6 +13,13 @@ const rewriteUnsupportedBrowserMethods = (req, res, next) => {
   next();
 };
 
+const hbs = exphbs.create({
+  helpers: {
+    json: function (context) {
+      return JSON.stringify(context);
+    }
+  }
+});
 // Middleware and Static Files
 app.use('/public', express.static('public'));
 app.use(express.json());
@@ -20,25 +27,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(rewriteUnsupportedBrowserMethods);
 
 // Set up Handlebars engine with layout directory
-app.engine('handlebars', exphbs.engine({defaultLayout: 'main'}));
+app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 
-// Middleware for login and signout routes
-app.use('/login', (req, res, next) => {
-  if (req.method === 'GET') {
-    return login(req, res, next);
-  }
-  next();
-});
-
-app.use('/signout', (req, res, next) => {
-  if (req.method === 'GET') {
-    return signout(req, res, next);
-  }
-  next();
-});
-
-// Session configuration
 app.use(
   session({
     name: 'AwesomeWebApp',
@@ -48,6 +39,30 @@ app.use(
     cookie: { maxAge: 60000 }
   })
 );
+// Middleware to reload the buttons in the if else in the layout handlebar
+app.use((req, res, next) => {
+  res.locals.user_logged = req.session.user || null;
+  next();
+});
+
+
+// Middleware for login and signout routes
+app.use('/user/login', (req, res, next) => {
+  if (req.method === 'GET') {
+    return login(req, res, next);
+  }
+  next();
+});
+
+app.use('/user/signout', (req, res, next) => {
+  if (req.method === 'GET') {
+    return signout(req, res, next);
+  }
+  next();
+});
+
+// Session configuration
+
 
 // Import and configure routes
 configRoutes(app);
