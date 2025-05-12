@@ -2,7 +2,8 @@
   const userData = {
     user_name: "{{user_name}}",
     email: "{{email}}",
-    reviews: {{{json reviews}}}
+    reviews: {{{json reviews}}},
+    wishlist: {{{json wishlist}}}
   };
 </script>
 <script src="/public/js/profile.js"></script>
@@ -10,6 +11,9 @@
 <h2>Hello <i>{{user_name}}</i>, find your information and reviews below:</h2>
 <h3>Username: {{user_name}}</h3>
 <h3>Email: {{email}}</h3>
+
+<h2>Your Wishlist</h2>
+<ul class="wishlist-container"></ul>
 
 <h2>Your Reviews: </h2>
 <ul class="user-review-container"></ul>

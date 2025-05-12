@@ -47,8 +47,7 @@ export async function getProfessorById(id) {
     validate(id, validate_string, [process_id]);
     const professorCollection = await profs();
     const _id = new ObjectId(id);
-    let info = await professorCollection.findOne(_id);
-    info._id = id;
+    const info = await professorCollection.findOne({_id});
     return info;
 }
 

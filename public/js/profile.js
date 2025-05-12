@@ -2,7 +2,7 @@ $(document).ready(function () {
   const container = $('.user-review-container');
 
   if (!userData || !userData.reviews || userData.reviews.length === 0) {
-    container.append('<p>No reviews. yet :)</p>');
+    container.append('<p>No reviews yet :)</p>');
     return;
   }
 
@@ -55,4 +55,31 @@ $(document).ready(function () {
       }
     });
   });
+
+  const wishlistContainer = $(".wishlist-container");
+  if(!wishlistContainer || userData.wishlist.length == 0){
+    wishlistContainer.append("<p>No professors to display. Go add some 😀</p>");
+  }
+  userData.wishlist.forEach((prof_id) => {
+    $.ajax({
+      url: "/professor/" + prof_id,
+      method: "GET",
+      success: function(prof) {
+        const li = $("<li>");
+        const card = $(`
+          <div class="wishlist-card">
+            <h3>${prof.professor_name}</h3>
+            <p>Email: ${prof.email}</p>
+            <p>Courses: ${prof.courses.join(', ')}</p>
+          </div>
+        `);
+        li.append(card);
+        wishlistContainer.append(li);
+      },
+      error: function() {
+        console.error("Failed to get wishlist");
+      }
+    });
+  })
+  
 });

@@ -490,3 +490,38 @@ form#review-form label {
 .dislike-button:hover {
   background-color: #f8d7da;
 }
+
+.wishlist-container{
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  background-color: #fafafa;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.wishlist-container li {
+  text-align: center;
+  flex: 1 1 calc(33.33% - 20px);
+  box-sizing: border-box
+}
+
+.add-wishlist{
+  background-color: #f1f1f1;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.add-wishlist:hover{
+  background-color: lightgoldenrodyellow
+}
+
+.wishlist-card{
+  border-radius: 8px;
+  padding: 15 px;
+  background-color: transparent;
+}

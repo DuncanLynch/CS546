@@ -47,6 +47,13 @@ $(document).ready(function () {
             activeButton = profId;
             button.addClass('professor-button-active');
             button.removeClass('professor-button');
+
+            const wishlistButton = $(`
+              <button class="add-wishlist" data-id="${profId}">
+                ⭐ Add <b>${professor.professor_name}</b> to Wishlist
+              </button>
+            `);
+            $('#wishlist-container').empty().append(wishlistButton);
           });
 
           $('.professor-buttons').append(button);
@@ -277,6 +284,22 @@ $(document).ready(function () {
       },
       error: function () {
         alert('Failed to fetch review data. Please try again.');
+      }
+    });
+  });
+
+  $('#wishlist-container').on('click', '.add-wishlist', function() {
+    const button = $(this);
+    const id = button.data('id');
+
+    $.ajax({
+      url: `/professor/${userData._id}/${id}`,
+      method: "POST",
+      success: function(){
+        button.text("✅ Added");
+      },
+      error: function(e){
+        alert(`${userData._id}, ${id}`);
       }
     });
   });

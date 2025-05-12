@@ -35,7 +35,8 @@ router
             user_name: loginUser.user_name, 
             _id: loginUser._id.toString(), 
             email: loginUser.email, 
-            reviews: loginUser.reviews
+            reviews: loginUser.reviews,
+            wishlist: loginUser.wishlist
         }
 
 
@@ -110,9 +111,13 @@ router
 .route('/profile')
 .get(async (req, res) => {
     try{
-        return res.status(200).render('profile', {user_name: req.session.user.user_name, email: req.session.user.email, reviews: req.session.user.reviews}) //change to profile handlebars
+        return res.status(200).render('profile', {
+          user_name: req.session.user.user_name, 
+          email: req.session.user.email, 
+          reviews: req.session.user.reviews, 
+          wishlist: req.session.user.wishlist});
     }catch(e){
-        return res.status(500).send("500: " + e)
+        return res.status(500).send("500: " + e);
     }
 })
 router
