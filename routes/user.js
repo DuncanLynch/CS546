@@ -3,11 +3,17 @@ import * as userData from '../data/users.js'
 import xss from 'xss';
 import crypto from 'crypto';
 import { ObjectId } from 'mongodb';
+import nodemailer from 'nodemailer';
 import {validate, validate_string, validate_user_name, validate_password, validate_stevens_email} from "../validation.js"
 const router = express.Router();
 const pendingUsers = new Map();
-
-
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'ratemyclassy@gmail.com',
+    pass: 'zmaxaclgndsmjffm' //  App Password from gmail
+  }
+});
 router
 .route('/')
 .get(async (req, res) => {
@@ -29,6 +35,13 @@ router
 })
 .post(async (req, res) => {
     let user_name, password = null;
+    try{
+      if (!req.body || !(Object.keys(req.body).length === 2)) {
+        return res.status(400).send("400: Invalid length of json");
+      }
+    }catch(e){
+      return res.status(500).render("500: " + e)
+    }
     try{
         user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
         password = validate(xss(req.body.password), validate_string, [validate_password])
@@ -65,6 +78,13 @@ router.route('/register')
 
     let user_name, password, email = null;
     try{
+      if (!req.body || !(Object.keys(req.body).length === 3)) {
+        return res.status(400).send("400: Invalid length of json");
+      }
+    }catch(e){
+      return res.status(500).render("500: " + e)
+    }
+    try{
       user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
       password = validate(xss(req.body.password), validate_string, [validate_password])
       email = validate(xss(req.body.email), validate_string, [validate_stevens_email])
@@ -74,9 +94,8 @@ router.route('/register')
     if(user_name === null || password === null || email === null) return res.status(500).send("500: One or more inputs was not set in validation")
 
     try {
-      /* const verificationCode = crypto.randomInt(100000, 999999).toString();
-      
-      // store temporarily
+      const verificationCode = crypto.randomInt(100000, 999999).toString();
+
       pendingUsers.set(email, {
         user_name,
         password,
@@ -84,20 +103,17 @@ router.route('/register')
         timestamp: Date.now()
       });
 
-      // send email
       await transporter.sendMail({
-        from: '"Trivia Game" <hypaplayz@gmail.com>',
+        from: '"Course Review" <your_email@gmail.com>',
         to: email,
         subject: 'Your verification code',
         text: `Hi ${user_name}, your verification code is: ${verificationCode}`
       });
 
-      return res.status(200).render('verify', { email }); // Render form to input the code */
+      return res.status(200).render('verify', { email });
 
-      const newUser = await userData.createUser(user_name, password, email);
-      return res.status(200).render('login');
     } catch (e) {
-      return res.status(500).json({error: e.message});
+      return res.status(500).send("500: " + e);
     }
 });
 router.route('/verify')
@@ -106,19 +122,32 @@ router.route('/verify')
     const codeEntered = xss(req.body.code);
 
     const pending = pendingUsers.get(email);
-    if (!pending) return res.status(400).send('No pending registration for this email.');
-
+     if (!pending) {
+      return res.status(400).render('verify', {
+        email,
+        error: 'No pending registration for this email.'
+      });
+    }
     if (pending.code !== codeEntered) {
-      return res.status(400).send('Invalid verification code.');
+      return res.status(400).render('verify', {
+        email,
+        error: 'Invalid verification code.'
+      });
     }
 
     try {
       const created = await userData.createUser(pending.user_name, pending.password, email);
       pendingUsers.delete(email); // clean up
 
-      return res.status(200).send('Registration complete! You can now log in.');
+      return res.status(200).render('login', {
+        message: 'Registration complete! You can now log in.'
+      });
     } catch (e) {
-      return res.status(500).send("500: " + e);
+      console.error("Account creation failed:", e);
+      return res.status(500).render('verify', {
+        email,
+        error: 'Server error during account creation. Please try again.'
+      });
     }
 });
 
@@ -130,8 +159,7 @@ router
           user_name: req.session.user.user_name, 
           email: req.session.user.email, 
           reviews: req.session.user.reviews, 
-          wishlist: req.session.user.wishlist,
-          userJson: JSON.stringify(req.session.user)});
+          wishlist: req.session.user.wishlist});
     }catch(e){
         return res.status(500).send("500: " + e);
     }
