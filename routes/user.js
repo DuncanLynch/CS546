@@ -7,13 +7,6 @@ import {validate, validate_string, validate_user_name, validate_password, valida
 const router = express.Router();
 const pendingUsers = new Map();
 
-import {
-  validate,
-  validate_string,
-  validate_user_name,
-  validate_password,
-  validate_stevens_email
-} from '../validation.js';
 
 router
 .route('/')
@@ -36,13 +29,6 @@ router
 })
 .post(async (req, res) => {
     let user_name, password = null;
-    try{
-      if (!req.body || !(Object.keys(req.body).length === 3)) {
-        return res.status(400).send("400: Invalid length of json");
-      }
-    }catch(e){
-      return res.status(500).render("500: " + e)
-    }
     try{
         user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
         password = validate(xss(req.body.password), validate_string, [validate_password])
@@ -79,13 +65,6 @@ router.route('/register')
 
     let user_name, password, email = null;
     try{
-      if (!req.body || !(Object.keys(req.body).length === 4)) {
-        return res.status(400).send("400: Invalid length of json");
-      }
-    }catch(e){
-      return res.status(500).render("500: " + e)
-    }
-    try{
       user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
       password = validate(xss(req.body.password), validate_string, [validate_password])
       email = validate(xss(req.body.email), validate_string, [validate_stevens_email])
@@ -118,7 +97,7 @@ router.route('/register')
       const newUser = await userData.createUser(user_name, password, email);
       return res.status(200).render('login');
     } catch (e) {
-      return res.status(500).send("500: " + e);
+      return res.status(500).json({error: e.message});
     }
 });
 router.route('/verify')
@@ -151,7 +130,8 @@ router
           user_name: req.session.user.user_name, 
           email: req.session.user.email, 
           reviews: req.session.user.reviews, 
-          wishlist: req.session.user.wishlist});
+          wishlist: req.session.user.wishlist,
+          userJson: JSON.stringify(req.session.user)});
     }catch(e){
         return res.status(500).send("500: " + e);
     }

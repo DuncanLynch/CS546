@@ -62,8 +62,10 @@ router.post('/:user_id/:prof_id', (async (req,res) => {
     const user_id = xss(req.params.user_id);
     const prof_id = xss(req.params.prof_id);
     try{
-        await userData.addWishlist(user_id, prof_id);
-        res.json({added: true});
-    }catch(e){return res.status(500).send("500: " + e);}
+        const added = await userData.addWishlist(user_id, prof_id);
+        return res.status(200).json({added});
+    }catch(e){
+        return res.status(500).json(e);
+    }
 }))
 export default router;

@@ -318,7 +318,6 @@ $(document).ready(function () {
       }
     });
   });
-});
   $('.review-container').on('submit', '.comment-form', function (e) {
     e.preventDefault();
 
@@ -370,14 +369,18 @@ $(document).ready(function () {
   });
 
   $('#wishlist-container').on('click', '.add-wishlist', function() {
+    if (!userData) return;
     const button = $(this);
     const id = button.data('id');
 
     $.ajax({
       url: `/professor/${userData._id}/${id}`,
       method: "POST",
-      success: function(){
-        button.text("✅ Added");
+      success: function(response){
+        if (response.added)
+          button.text("✅ Added");
+        else 
+          button.text("✅ Added");
       },
       error: function(e){
         alert(`${userData._id}, ${id}`);

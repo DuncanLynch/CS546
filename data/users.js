@@ -188,7 +188,7 @@ export async function addWishlist(user_id, prof_id){
     );
     
     if (result.modifiedCount === 0) {
-        throw new Error("Wishlist not updated.");
+        return false;
     }
 
   return true;
