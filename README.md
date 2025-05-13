@@ -49,7 +49,7 @@ Run this command in order to download the Stevens Academic Catalog Database (Onl
 npm run scrape
 ```
 
-### Sylabus
+### Syllabus
 
 
 
