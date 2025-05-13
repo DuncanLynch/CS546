@@ -35,15 +35,7 @@ scrape
 ``sh
   npm run scape
   ```
-
 ### Seed File
-
-Run this command in order to run the Seed file
-
-seed
-``sh
-  npm run seed
-  ```
 
 ### Sylabus Upload
 
