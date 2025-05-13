@@ -159,7 +159,7 @@ router
         if (!(Object.keys(req.body).length === 0)) {
           return res.status(400).send("400: Route was not expecting json");
         }
-        return res.status(200).render('profile', {user_name: xss(req.session.user.user_name), email: xss(req.session.user.email), reviews: req.session.user.reviews, wishlist: req.session.user.wishlist})
+        return res.status(200).render('profile', {user_name: xss(req.session.user.user_name), email: xss(req.session.user.email), reviews: req.session.user.reviews, wishlist: req.session.user.wishlist, userJson: JSON.stringify(req.session.user)})
     }catch(e){
         return res.status(500).send("500: " + e);
     }
