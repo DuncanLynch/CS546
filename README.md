@@ -11,7 +11,7 @@
       <ul>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#Scraping">Scraping Classes</a></li>
-        <li><a href="#Seeding">Seeding</a></li>
+        <li><a href="#Seeding">Seed File</a></li>
         <li><a href="#Syllabus">Syllabus Upload</a></li>
       </ul>
   </ol>
@@ -28,15 +28,23 @@ Rate My Classy is a web platform designed specifically for Stevens Institute of 
 ### Installation
 
 ### Scraping Classes
+
 Run this command in order to download the Stevens Academic Catalog Database
+
+scrape
 ``sh
   npm run scape
   ```
-### Seeding
+
+### Seed File
+
 Run this command in order to run the Seed file
+
+seed
 ``sh
   npm run seed
   ```
+
 ### Sylabus Upload
 
 
