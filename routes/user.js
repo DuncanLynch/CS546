@@ -49,7 +49,7 @@ router
       const verificationCode = crypto.randomInt(100000, 999999).toString();
 
       pendingUsers.set(user.email, {
-        loggingin: false,
+        loggingin: true,
         user_name,
         password,
         code: verificationCode,
@@ -145,7 +145,7 @@ router.route('/verify')
 
     try {
       if (pending.loggingin) {
-        const us = userData.getUserByName(pending.user_name)
+        const us = await userData.getUserByName(pending.user_name)
         pendingUsers.delete(email); // clean up
         req.session.user = {
             user_name: us.user_name, 
