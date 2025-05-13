@@ -1,4 +1,4 @@
-# CS546 Rate My Classy
+# Rate My Classy - CS546 Final Project
 
 <details>
   <summary>Table of Contents</summary>
