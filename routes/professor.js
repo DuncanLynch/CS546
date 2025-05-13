@@ -1,6 +1,7 @@
 import express from 'express';
 import * as professorData from '../data/professors.js'
 import * as classData from '../data/classes.js'
+import * as userData from '../data/users.js'
 import xss from 'xss'
 import { ObjectId } from 'mongodb';
 import { process_id, validate, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_number, validate_user_name, validate_prerequisites, validate_professor_name, validate_stevens_email} from "../validation.js";
@@ -9,7 +10,6 @@ router
 .route('/')
 .get(async (req, res) => {
     try{
-        console.log("GET Caught!");
         if (!(Object.keys(req.body).length === 0)) {
             return res.status(400).send("400: Route was not expecting json");
         }
@@ -42,7 +42,7 @@ router
         return res.status(400).send("400: " + e);
     }
     if(professor_name === null || course_code === null || email === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    console.log("validated post")
+
         try {
             const cls = await classData.getClassbyCourseCode(course_code);
             const newProfessor = await professorData.createProfessor(professor_name, course_code, email);
@@ -50,10 +50,10 @@ router
             return res.status(200).json(newProfessor);
         } catch (e) {
             // Something went wrong with the server!
-            console.log(e);
             return res.status(500).send("500: " + e);
         }
 })
+
 router
 .route('/:id')
 .get(async (req, res) => {
@@ -101,4 +101,14 @@ router
         return res.status(404).send("404: "+ e)
     }
 })
+router.post('/:user_id/:prof_id', (async (req,res) => {
+    const user_id = xss(req.params.user_id);
+    const prof_id = xss(req.params.prof_id);
+    try{
+        const added = await userData.addWishlist(user_id, prof_id);
+        return res.status(200).json({added});
+    }catch(e){
+        return res.status(500).json(e);
+    }
+}))
 export default router;

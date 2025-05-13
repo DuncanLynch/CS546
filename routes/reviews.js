@@ -3,7 +3,7 @@ import * as classData from '../data/classes.js'
 import * as userData from '../data/users.js'
 import xss from 'xss'
 import { process_id, validate, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_yyyymmdd_date, validate_number, validate_user_name, validate_prerequisites} from "../validation.js";
-
+import { ObjectId } from 'mongodb';
 const router = express.Router();
 
 router
@@ -99,7 +99,8 @@ router
     }
     console.log(updatedFields)
     try{
-        const updatedReview = await classData.updateReview(course_code, rid, updatedFields) 
+        const updatedReview = await classData.updateReview(course_code, rid, updatedFields) ;
+        await userData.updateReview(course_code, rid, updatedFields);
         return res.status(200).send(updatedReview)
     }catch (e){
         console.log(e)
@@ -249,9 +250,8 @@ router
     }
     if (classId === null || course_code === null || professor_id === null || review_title === null || reviewer_id === null || review_date === null || review_contents === null || review_quality_rating === null || review_difficulty_rating === null || review_total_rating === null || user_name === null) return res.status(500).send("500: One or more inputs was not set in validation")
     console.log("post review")
-    console.log(req.body);
     try{
-        const newReview = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name})
+        const newReview = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name, _rid: _rid.toString() })
         await userData.addReview(user_name, newReview) //awaiting on this function, update param upon duncan push
         return res.status(200).send(newReview)
     }catch(e){
@@ -259,4 +259,36 @@ router
         return res.status(404).send(e);
     }
 })
-export default router
+router
+.route('/comment/:id')
+.post(async (req, res) => {
+  try {
+    const reviewId = validate(xss(req.params.id), validate_string, [process_id]);
+    const commentText = xss(req.body.commentText);
+    const classId = xss(req.body.classId)
+    const reviewer = xss(req.body.reviewer)
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ error: 'User must be logged in to comment.' });
+    }
+
+    const user_name = validate(req.session.user.user_name, validate_string, [validate_user_name]);
+
+    let userSuccess = false;
+    let classSuccess = false;
+    const commentId = new ObjectId();
+    classSuccess = await classData.addComment(user_name, reviewId, classId, commentText, commentId);
+    userSuccess = await userData.addComment(user_name, reviewId, commentText, commentId, reviewer);
+
+    if (!userSuccess && !classSuccess) {
+      return res.status(500).json({ error: 'Failed to add comment to both user and class records.' });
+    }
+
+    return res.status(200).json({ message: 'Comment added successfully.'});
+
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({ error: e.message });
+  }
+});
+
+export default router;

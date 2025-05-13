@@ -1,11 +1,14 @@
-{{#if user_logged}}
-<script>
-  const userData = {{{userJson}}};
-</script>
-{{/if}}
 <script>
   const classData = {{{json class}}};
+  let userData = null;
 </script>
+{{#if user_logged}}
+<script>
+  userData = {{{userJson}}};
+</script>
+{{/if}}
+
+<script src="/public/js/badwords.js"></script>
 <script src="/public/js/clid_script.js"></script>
 
 <div class="class-info">
@@ -78,6 +81,7 @@
       <div class="professor-buttons">
         <button id="0" class="professor-button-active">All Professors</button>
       </div>
+      <div id="wishlist-container"></div>
       <ul class="review-container">
       </ul>
     </div>
