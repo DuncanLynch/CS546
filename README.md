@@ -31,7 +31,7 @@ Rate My Classy is a web platform designed specifically for Stevens Institute of 
 
 Run this command in order to download the Stevens Academic Catalog Database
 
-*Scrape
+* Scrape
 
 
 
