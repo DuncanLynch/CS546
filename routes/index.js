@@ -10,7 +10,7 @@ const constructorMethod = (app) => {
   app.use('/user', userRoutes);
   app.use('/', homeRoutes)
   app.use('*', (req, res) => {
-    res.status(404).json({error: 'Route Not found'});
+    res.status(404).render('error',{error: 'Page Not found!', status: 404});
   });
 };
 

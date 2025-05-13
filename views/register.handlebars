@@ -1,25 +1,29 @@
 {{! <script src="/public/js/registration_handler.js"></script> !}}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<div class="flex-col">
+    <div class="already">
+        <h1>Welcome</h1>
+        <h2>The first steps to the perfect semester begins now!</h3>
+        <h3>Please register with a username, password, and a stevens email!</h3>
+    </div>
+    <div>
+        <div class="centerForm">
+            <form action="/user/register" method="POST" id="signup-form" name="signup-form" class="register" align="center">
+                <label for="user_name">Enter Username:</label>
+                <input type="text" id="user_name" name="user_name">
+                <br>
+                <label for="password">Enter Password:</label>
+                <input type="password" id="password" name="password">
+                <br>
+                <label for="email">Enter Email:</label>
+                <input type="text" id="email" name="email">
+                <br>
 
-<h1>Welcome</h1>
-<h2>The first steps to the perfect semester begins now!</h3>
-<h3>Please register with a username, password, and a stevens email!</h3>
-
-<div class="centerForm">
-<form action="/user/register" method="POST" id="signup-form" name="signup-form" class="register" align="center">
-    <label for="user_name">Enter Username:</label>
-    <input type="text" id="user_name" name="user_name">
-    <br>
-    <label for="password">Enter Password:</label>
-    <input type="password" id="password" name="password">
-    <br>
-    <label for="email">Enter Email:</label>
-    <input type="text" id="email" name="email">
-    <br>
-
-    <button type="submit" id="submit_button">Submit</button>
-</form>
-</div>
-<div class="already">
-<a id="signinlink" href="/user/login" align="center">Already have an account? Click here to sign-in</a>
+                <button type="submit" id="submit_button">Submit</button>
+            </form>
+        </div>
+        <div class="already">
+            <a id="signinlink" href="/user/login" align="center">Already have an account? Click here to sign-in</a>
+        </div>
+    </div>
 </div>
