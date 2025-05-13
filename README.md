@@ -32,9 +32,9 @@ Run this command in order to download the Stevens Academic Catalog Database (Onl
 npm run scrape
 ```
 
-## Syllabus
+### Syllabus
 
-
+If a course syllabus is found it will be displayed; Otherwise it is not in the syllabus bank. 
 
 
 
