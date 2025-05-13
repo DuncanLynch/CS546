@@ -1,12 +1,16 @@
-<h2>Enter Your Verification Code</h2>
 
-{{#if error}}<p style="color: red;">{{error}}</p>{{/if}}
 
-<form method="POST" action="/user/verify">
-  <input type="hidden" name="email" value="{{email}}">
-  
-  <label for="code">Verification Code:</label>
-  <input type="text" name="code" id="code" required>
+{{#if error}}<p class="error">{{error}}</p>{{/if}}
+<div class="flex-col">
+  <h2>Enter Your Verification Code</h2>
+  <div class="container">
+    <form id="verify-form" method="POST" action="/user/verify">
+      <input type="hidden" name="email" value="{{email}}">
+      
+      <label for="code">Verification Code:</label>
+      <input type="text" name="code" id="code" required>
 
-  <button type="submit">Verify</button>
-</form>
+      <button type="submit">Verify</button>
+    </form>
+  </div>
+</div>
