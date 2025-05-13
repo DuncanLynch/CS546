@@ -95,6 +95,14 @@ router.route('/register')
     }
     if(user_name === null || password === null || email === null) return res.status(500).send("500: One or more inputs was not set in validation")
     try {
+
+      const existingUser = await userData.getUserByUsernameOrEmail(user_name, email);
+      if (existingUser) {
+        return res.status(400).render('register', {
+          error: "An account with this username or email already exists."
+        });
+      }
+
       const verificationCode = crypto.randomInt(100000, 999999).toString();
 
       pendingUsers.set(email, {
@@ -105,7 +113,7 @@ router.route('/register')
       });
 
       await transporter.sendMail({
-        from: '"Course Review" <your_email@gmail.com>',
+        from: '"Course Review" <ratemyclassy@gmail.com>',
         to: email,
         subject: 'Your verification code',
         text: `Hi ${user_name}, your verification code is: ${verificationCode}`

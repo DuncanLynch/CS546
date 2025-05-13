@@ -239,3 +239,9 @@ export async function addComment(user_name, reviewId, commentText, commentId, re
     return comment;
 }
 
+export async function getUserByUsernameOrEmail(user_name, email) {
+  const userCollection = await users();
+  return await userCollection.findOne({
+    $or: [{ user_name }, { email }]
+  });
+}

@@ -5,6 +5,14 @@
 <h2>The first steps to the perfect semester begins now!</h3>
 <h3>Please register with a username, password, and a stevens email!</h3>
 
+
+{{#if error}}
+  <div class="error-message" style="color: red; text-align: center; margin-bottom: 10px;">
+    {{error}}
+  </div>
+{{/if}}
+
+
 <div class="centerForm">
 <form action="/user/register" method="POST" id="signup-form" name="signup-form" class="register" align="center">
     <label for="user_name">Enter Username:</label>
