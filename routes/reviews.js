@@ -36,15 +36,23 @@ router
 .put(async (req, res) => {
     const rid = xss(req.params.id)
     const course_code = xss(req.body.course_code)
-    const updatedFields = req.body.updatedFields
+    const updatedFields = req.body.updatedFields;
+    const user_name = xss(req.body.user_name);
+    let updatedReview;
     try{
-        const updatedReview = await classData.updateReview(course_code, rid, updatedFields) ;
-        await userData.updateReview(course_code, rid, updatedFields);
-        return res.status(200).send(updatedReview)
+        updatedReview = await classData.updateReview(course_code, rid, updatedFields) ;  
     }catch (e){
         console.log(e)
         return res.status(404).send("404: "+ e)
     }
+    try {
+        await userData.updateReview(user_name, rid, updatedFields);
+    }
+    catch(e) {
+        return res.status(201).send(updatedReview);
+    }
+    
+    return res.status(200).send(updatedReview)
 })
 router
 .route('/:classId')

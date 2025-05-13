@@ -89,14 +89,14 @@ export async function validateUser(user_name, password) {
 }
 
 
-export async function updateReview(course_code, rid, updatedFields) {
-    validate(course_code, validate_string, [process_course_code]);
+export async function updateReview(user_name, rid, updatedFields) {
+    validate(user_name, validate_string, [validate_user_name]);
     validate(rid, validate_string, [process_id]);
     const userCollection = await users();
     const updateResult = await userCollection.updateOne(
         {
-            course_code,
-            "reviews._rid": new ObjectId(rid),
+            user_name,
+            "reviews._rid": rid,
         },
         {
             $set: Object.fromEntries(
@@ -104,12 +104,11 @@ export async function updateReview(course_code, rid, updatedFields) {
             )
         }
     );
-
     if (updateResult.modifiedCount === 0) {
         throw new Error("Failed to update review: review not found or no changes made.");
     }
 
-    const updatedClass = await userCollection.findOne({ course_code });
+    const updatedClass = await userCollection.findOne({ user_name });
     updatedClass._id = updatedClass._id.toString();
     return updatedClass;
 }

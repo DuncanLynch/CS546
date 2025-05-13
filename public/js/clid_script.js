@@ -128,7 +128,7 @@ $(document).ready(function () {
         </div>
         <div class="comments-section">
           <h5>Comments</h5>
-          ${commentHTML || "<p>No comments yet.</p>"}
+          ${commentHTML || "<p id='nocom'>No comments yet.</p>"}
           <form class="comment-form" id="${review._rid}">
             <input type="text" name="commentText" placeholder="Add a comment" required />
             <button type="submit">${userData ? 'Post' : 'You Must Be Logged in to Post A Comment!'}</button>
@@ -286,6 +286,7 @@ $(document).ready(function () {
       url: `/reviews/review/${reviewId}`,
       type: 'GET',
       success: function (response) {
+        const reviewerName = $(`.like-button[data-id="${reviewId}"]`).closest('li').data('reviewer-name');
         const id = userData._id.toString();
         const like = isLike ? 1 : 0;
         let likers = response.likers;
@@ -298,10 +299,10 @@ $(document).ready(function () {
         }
 
         if(status != undefined && status != like) {
-        likers[userData._id] = like;
+          likers[userData._id] = like;
         }
         else{
-        likers[userData._id] = like;
+          likers[userData._id] = like;
         }
 
         const likes = Object.values(likers).filter(l => l == 1).length;
@@ -310,6 +311,7 @@ $(document).ready(function () {
         const updatedFields = {
           course_code: courseCode,
           _rid: reviewId,
+          user_name: reviewerName,
           updatedFields:{
             likes,
             dislikes,
@@ -374,7 +376,7 @@ $(document).ready(function () {
         reviewer: reviewerName,
       }),
       success: function (newComment) {
-        
+        $('#nocom').hide();
         const commentHTML = `
           <div class="comment">
             <p><span class='strong'>${userData.user_name}</span> (${new Date().toISOString().substring(0,10)}):</p>
