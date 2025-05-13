@@ -6,7 +6,7 @@ async function parseCourse(link, code) {
     try {
         const response = await axios.get(link);
         const $ = cheerio.load(response.data);
-
+        
         const h1 = $('#main h1');
         const course_code = h1.find('span').text().trim();
         const course_name = h1.clone().children().remove().end().text().trim(); // removes span, keeps the rest
@@ -19,7 +19,7 @@ async function parseCourse(link, code) {
         if (offeredText.includes("Spring")) typically_offered += "Spring Semester";
 
         const prereq = $('.sc_prereqs').text().replace("Prerequisite", "").trim();
-
+        
         await createClass(
             course_code,
             course_name,
@@ -38,11 +38,9 @@ async function parseCourse(link, code) {
 async function main() {
     const linkstem = "https://stevens.smartcatalogiq.com";
     const catalogUrl = "https://stevens.smartcatalogiq.com/Institutions/Stevens-Institution-of-Technology/json/2024-2025/Academic-Catalog.json";
-
     try {
         const response = await axios.get(catalogUrl);
         const data = response.data;
-
         const coursedict = data.Children[24];
 
         for (const sec of coursedict.Children) {
