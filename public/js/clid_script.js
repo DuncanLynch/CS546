@@ -208,7 +208,7 @@ $(document).ready(function () {
     if (errorMessages.length > 0) {
       const errorDiv = $('<div id="errorMessages">');
       errorMessages.forEach(function (msg) {
-        errorDiv.append(`<p class='error'>'${msg}'</p>`);
+        errorDiv.append(`<p class='error'>${msg}</p>`);
       });
       $('#review-form').append(errorDiv);
       return;
@@ -351,43 +351,54 @@ $(document).ready(function () {
     const reviewerName = form.closest('li').data('reviewer-name');
 
 
-    if (!commentText) return;
-    const checkBadWords = (text) => {
-      const lowerText = text.toLowerCase();
-      return bad_words.some((word) => lowerText.includes(word));
-    };
-    let errorMessages = [];
-    if (checkBadWords(commentText)) {
-      errorMessages.push("Comment contains inappropriate language.");
-    }
-    if (errorMessages.length > 0) {
-      errorMessages.forEach(function (msg) {
-        form.append(`<p class='error'>'${msg}'</p>`);
-      });
-      return
-    }
+    
     $.ajax({
-      url: `/reviews/comment/${reviewId}`,
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        classId: classData._id,
-        commentText: commentText, 
-        reviewer: reviewerName,
-      }),
-      success: function (newComment) {
-        $('#nocom').hide();
-        const commentHTML = `
-          <div class="comment">
-            <p><span class='strong'>${userData.user_name}</span> (${new Date().toISOString().substring(0,10)}):</p>
-            <p>${commentText}</p>
-          </div>
-        `;
-        form.before(commentHTML);
-        form[0].reset();
-      },
-      error: function (error) {
-        alert(`Failed to post comment.`);
+      url: 'https://raw.githubusercontent.com/zacanger/profane-words/master/words.json',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) { 
+        let errorMessages = [];
+        const commentWords = commentText.split(/\s+/);
+        let badword = false;
+        for (const word of commentWords) {
+          if (data.includes(word.toLowerCase())) {
+            badword = true;
+          }
+        }
+        if (badword) {
+            errorMessages.push('Please no profanity.');
+            form.find('input[name="commentText"]').val('');
+        }
+        if (errorMessages.length > 0) {
+          errorMessages.forEach(function (msg) {
+            form.append(`<p class='error'>${msg}</p>`);
+          });
+          return
+        }
+        $.ajax({
+          url: `/reviews/comment/${reviewId}`,
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            classId: classData._id,
+            commentText: commentText, 
+            reviewer: reviewerName,
+          }),
+         success: function (newComment) {
+            $('#nocom').hide();
+            const commentHTML = `
+              <div class="comment">
+                <p><span class='strong'>${userData.user_name}</span> (${new Date().toISOString().substring(0,10)}):</p>
+                <p>${commentText}</p>
+              </div>
+            `;
+            form.before(commentHTML);
+            form[0].reset();
+          },
+          error: function (error) {
+            alert(`Failed to post comment.`);
+          }
+        });
       }
     });
   });
