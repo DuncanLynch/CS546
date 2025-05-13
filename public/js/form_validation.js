@@ -14,8 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     user_name,
                     password
                 });
-                alert("Login successful!");
-                window.location.href = "/dashboard";
+                window.location.href = "/";
             } catch (error) {
                 if (error.response && error.response.status === 401) {
                     alert("Invalid username or password.");
