@@ -1,22 +1,5 @@
 # Rate My Classy - CS546 Final Project
 
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#installation">Installation</a></li>
-         <li><a href="#Seeding">Seed File</a></li>
-        <li><a href="#Scraping">Scraping Classes</a></li>
-      </ul>
-      <li><a href="#Syllabus">Syllabus Upload</a></li>
-  </ol>
-</details>
-
 
 ## About The Project
 
@@ -43,13 +26,13 @@ npm run seed
 
 ### Scraping Classes
 
-Run this command in order to download the Stevens Academic Catalog Database (Only run this command if you wish to see the entire Stevens' Course Database)
+Run this command in order to download the Stevens Academic Catalog Database (Only run this command if you wish to see the entire Stevens Course Database after testing)
 
 ```
 npm run scrape
 ```
 
-### Syllabus
+## Syllabus
 
 
 
