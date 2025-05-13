@@ -59,9 +59,14 @@ router
     }
 })
 .put(async (req, res) => {
-    let rid, course_code, updatedFields = null
+    const rid = xss(req.params.id)
+    const course_code = xss(req.body.course_code)
+    const updatedFields = req.body.updatedFields;
+    const user_name = xss(req.body.user_name);
+    let updatedReview;
+    let rid, course_code, updatedFields, user_name = null
     try{
-        if (!req.body || !(Object.keys(req.body).length === 3)) {
+        if (!req.body || !(Object.keys(req.body).length === 4)) {
             return res.status(400).send("400: Invalid length of json");
         }
     }catch(e){
@@ -70,7 +75,7 @@ router
     try{
         rid = validate(xss(req.params.id), validate_string, [process_id])
         course_code = validate(xss(req.body.course_code), validate_string, [process_course_code])
-
+        user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
                 /*
                     professor_id
                     review_title
@@ -99,13 +104,19 @@ router
     }
     console.log(updatedFields)
     try{
-        const updatedReview = await classData.updateReview(course_code, rid, updatedFields) ;
-        await userData.updateReview(course_code, rid, updatedFields);
-        return res.status(200).send(updatedReview)
+        updatedReview = await classData.updateReview(course_code, rid, updatedFields) ;  
     }catch (e){
         console.log(e)
         return res.status(404).send("404: "+ e)
     }
+    try {
+        await userData.updateReview(user_name, rid, updatedFields);
+    }
+    catch(e) {
+        return res.status(201).send(updatedReview);
+    }
+    
+    return res.status(200).send(updatedReview)
 })
 router
 .route('/review/:id/comments')

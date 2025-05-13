@@ -171,7 +171,7 @@ export async function updateReview(course_code, rid, updatedFields) {
     const updateResult = await classCollection.updateOne(
         {
             course_code,
-            "reviews._rid": new ObjectId(rid),
+            "reviews._rid": rid,
         },
         {
             $set: Object.fromEntries(
