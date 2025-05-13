@@ -206,11 +206,16 @@ export async function getWishlist(user_id){
 }
 
 export async function addComment(user_name, reviewId, commentText, commentId, reviewer) {
+    console.log("useraddcom")
     user_name = validate(user_name, validate_string, [validate_user_name]);
+    console.log("one")
+    console.log(reviewer)
     reviewer = validate(reviewer, validate_string, [validate_user_name]);
+    console.log("two")
     reviewId = validate(reviewId, validate_string, [process_id]);
-    commentText = validate(commentText, validate_string);
-
+    console.log("check")
+    commentText = validate(commentText, validate_string, []);
+    console.log(user_name, reviewId, commentText, commentId, reviewer)
     if (!ObjectId.isValid(reviewId)) throw new Error("Invalid review ID.");
 
     const comment = {

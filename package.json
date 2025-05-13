@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "seed": "node seed.js",
+    "scrape": "node scrape.js"
   },
   "repository": {
     "type": "git",

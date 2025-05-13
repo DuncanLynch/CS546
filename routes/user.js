@@ -119,7 +119,8 @@ router.route('/register')
 });
 router.route('/verify')
   .post(async (req, res) => {
-    const email = xss(req.body.email);
+    const email = validate(xss(req.body.email), validate_string, [validate_stevens_email])
+    console.log("CODE: " + req.body.code)
     const codeEntered = xss(req.body.code);
 
     const pending = pendingUsers.get(email);

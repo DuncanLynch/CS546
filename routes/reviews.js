@@ -268,7 +268,7 @@ router
     if (classId === null || course_code === null || professor_id === null || review_title === null || reviewer_id === null || review_date === null || review_contents === null || review_quality_rating === null || review_difficulty_rating === null || review_total_rating === null || user_name === null) return res.status(500).send("500: One or more inputs was not set in validation")
     console.log("post review")
     try{
-        const _rid = ObjectId();
+        const _rid = new ObjectId();
         const newReview = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name, _rid: _rid.toString() })
         await userData.addReview(user_name, newReview) //awaiting on this function, update param upon duncan push
         return res.status(200).send(newReview)
@@ -294,8 +294,8 @@ router
     let userSuccess = false;
     let classSuccess = false;
     const commentId = new ObjectId();
-    classSuccess = await classData.addComment(user_name, reviewId, classId, commentText, commentId);
-    userSuccess = await userData.addComment(user_name, reviewId, commentText, commentId, reviewer);
+    classSuccess = await classData.addComment(user_name, reviewId, classId, commentText, commentId.toString());
+    userSuccess = await userData.addComment(user_name, reviewId, commentText, commentId.toString(), reviewer);
 
     if (!userSuccess && !classSuccess) {
       return res.status(500).json({ error: 'Failed to add comment to both user and class records.' });
