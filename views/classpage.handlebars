@@ -19,10 +19,17 @@
       <div class="stats-container">
         <label>Course Description:</label>
         <p>{{class.course_description}}</p>
+        {{#if class.typically_offered}}
         <label>Typically Offered:</label>
         <p>{{class.typically_offered}}</p>
+        {{/if}}
+        {{#if class.prerequisites}}
         <label>Prerequisites:</label>
         <p>{{class.prerequisites}}</p>
+        {{/if}}
+        {{#if syllabus}}
+        <a href="/public{{syllabus}}" download="{{class.course_code}}">Download Located Syllabus</a>
+        {{/if}}
         <div class="flex-row">
           <div>
           <label>Total Rating:</label>

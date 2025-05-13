@@ -2,7 +2,8 @@
 import { ObjectId } from "mongodb";
 import { classes } from "../mongodb/mongoCollections.js";
 import { process_id, validate, validate_string, validate_user_name, process_numerical_rating, process_course_code, validate_yyyymmdd_date, validate_number } from "../validation.js";
-
+import fs from 'fs/promises';
+import path from 'path';
 // Data Functions:
 
 export async function createClass(course_code, course_name, course_description, typically_offered, prerequisites) {
@@ -20,7 +21,7 @@ export async function createClass(course_code, course_name, course_description, 
         class_quality_rating: 0,
         class_total_rating: 0,
         reviews: [],
-        professors: []
+        professors: [],
     };
 
     const classCollection = await classes();
@@ -34,6 +35,31 @@ export async function createClass(course_code, course_name, course_description, 
         _id: result.insertedId.toString()
     };
 }
+
+
+export async function findSyllabus(course_code) {
+    validate(course_code, validate_string, [process_course_code]);
+    const [department] = course_code.split(' ');
+    const dirPath = path.join(process.cwd(), 'public', 'syllabus', department);
+
+    try {
+        const files = await fs.readdir(dirPath);
+        const foundFile = files.find(file =>
+            file.toLowerCase().includes(course_code.toLowerCase())
+        );
+
+        if (foundFile) {
+            return `/syllabus/${department}/${foundFile}`;
+        } else {
+            return null;
+        }
+
+    } catch (err) {
+        console.error(`Error reading syllabus directory for ${department}:`, err.message);
+        return null;
+    }
+}
+
 
 export async function getClassById(id) {
     validate(id, validate_string, [process_id]);

@@ -92,12 +92,15 @@ router
     if(course_code === null) return res.status(500).send("500: One or more inputs was not set in validation")
     try{
         const foundClass = await classData.getClassbyCourseCode(course_code);
+        const foundSyllabus = await classData.findSyllabus(course_code);
         //CHANGE THE VALUES OF THIS OBJECT BELOW HOW YOU LIKE, IF YOU NEED MORE DATA PASSED INTO YOUR COURSE PAGE JUST ASK ME, FOR NOW I AM JUST PASSING A COURSE OBJECT
         //THIS TEST OBJECT DOES NOT HAVE A _id PARAMETER, IN THE REAL DEAL IT WILL HAVE ONE, FOR NOW JUST PRETEND LIKE IT HAS ONE
         //CHANGE CLASSPAGE TO THE NAME OF THE CLASS PAGE HANDLEBARS FILE
         return res.status(200).render('classpage', {
             class: foundClass, 
-            userJson: JSON.stringify(req.session.user)})
+            userJson: JSON.stringify(req.session.user),
+            syllabus: foundSyllabus
+        })
     }catch (e){
         return res.status(404).send("404: "+ e)
     }
