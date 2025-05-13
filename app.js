@@ -65,6 +65,7 @@ app.use('/user/profile', (req, res, next) => {
   if(req.method === 'GET' || req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login');
   next();
 });
+/*
 app.use('/reviews/:classId', (req, res, next) => {
   if(req.method === 'POST') return middleware.loggedin_no_owner(req, res, next, '/')
     next();
@@ -77,6 +78,7 @@ app.use('/reviews/review/:reviewId/comments', (req, res, next) => {
   if(req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login')
   next();
 })
+*/
 const hbs = exphbs.create({
   helpers: {
     json: function (context) {

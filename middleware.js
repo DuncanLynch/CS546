@@ -3,6 +3,29 @@ import express from 'express';
 import * as classData from './data/classes.js'
 import xss from 'xss'
 
+const reviewAttempts = {}
+
+const REVIEW_LIMIT = 5;
+const WINDOW_MS = 60 * 1000;
+
+function rateLimitReviews(req, res, next) {
+  if (!req.session.user) {
+    return res.status(401).json({error: "User not logged in to review."});
+  }
+  const user_name = req.session.user.user_name;
+  const now = Date.now();
+  if (!reviewAttempts[user_name]) {
+    reviewAttempts[user_name] = [];
+  }
+  reviewAttempts[user_name] = reviewAttempts[user_name].filter(timestamp => now - timestamp < WINDOW_MS);
+
+  if (reviewAttempts[user_name].length >= REVIEW_LIMIT) {
+    return res.status(402).json({ error: 'Too many review attempts. Please try again later.' });
+  }
+  reviewAttempts[user_name].push(now);
+
+  next();
+}
 
 //gonna need more
 export const notloggedin = (req, res, next, redirect) => {
@@ -24,6 +47,7 @@ export const noaccess = (req, res, next, redirect) => {
     return res.redirect(redirect);
 
 }
+/*
 export const loggedin_no_owner = async (req, res, next, redirect) => {
     if(!req.session.user) {
         return res.redirect(redirect)
@@ -64,4 +88,4 @@ export const loggedin_no_owner_profs = async (req, res, next, redirect) => {
         console.log("dink")
         return res.redirect(redirect)}
     next()
-}
+}*/
