@@ -11,6 +11,7 @@
       <ul>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#Scraping">Scraping Classes</a></li>
+        <li><a href="#Seeding">Seeding</a></li>
         <li><a href="#Syllabus">Syllabus Upload</a></li>
       </ul>
   </ol>
@@ -19,9 +20,24 @@
 
 ## About The Project
 
+Rate My Classy is a web platform designed specifically for Stevens Institute of Technology students to share and access course reviews. While the academic catalog provides official course information, it often lacks the valuable insights that come from student experiences.
+
+
 ## Getting Started
 
 ### Installation
+
 ### Scraping Classes
+Run this command in order to download the Stevens Academic Catalog Database
+``sh
+  npm run scape
+  ```
+### Seeding
+Run this command in order to run the Seed file
+``sh
+  npm run seed
+  ```
 ### Sylabus Upload
+
+
 
