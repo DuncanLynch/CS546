@@ -2,9 +2,6 @@
 import express from 'express';
 import * as classData from './data/classes.js'
 import xss from 'xss'
-export const notloggedin = (req, res, next, redirect) => {
-    if (req.session.user) {
-      return res.redirect(redirect);
 
 
 //gonna need more
@@ -22,7 +19,7 @@ export const loggedin = (req, res, next, redirect) => {
     }
     next();
 };
-}
+
 export const noaccess = (req, res, next, redirect) => {
     return res.redirect(redirect);
 

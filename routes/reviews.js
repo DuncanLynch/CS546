@@ -59,10 +59,6 @@ router
     }
 })
 .put(async (req, res) => {
-    const rid = xss(req.params.id)
-    const course_code = xss(req.body.course_code)
-    const updatedFields = req.body.updatedFields;
-    const user_name = xss(req.body.user_name);
     let updatedReview;
     let rid, course_code, updatedFields, user_name = null
     try{
@@ -86,7 +82,7 @@ router
                     likes
                     dislikes
         
-        */
+                */
         updatedFields = req.body.updatedFields
         if( !(updatedFields.constructor === Object)) return res.status(400).send("400: Expected an object");
         for(let i in updatedFields){
@@ -97,9 +93,19 @@ router
             else if(i === "review_contents") updatedFields[i] = validate(xss(req.body.updatedFields.review_contents), validate_string, []);
             else if(i === "likes")  updatedFields[i] = validate(Number(xss(req.body.updatedFields.likes)), validate_number, [process_unsignedint]);
             else if(i === "dislikes") updatedFields[i] = validate(Number(xss(req.body.updatedFields.dislikes)), validate_number, [process_unsignedint]);
-            else return res.status(400).send("400: Unexpected key in updatedFields");
+            else if (i === "likers") {
+                let likers = updatedFields[i];
+                Object.keys(likers).forEach((key) => {
+                    validate(xss(key), validate_string, [process_id]);
+                });
+            }
+            else {
+                console.log(updatedFields);
+                return res.status(400).send("400: Unexpected key in updatedFields");
+            }
         }
     }catch(e){
+        console.log(e);
         return res.status(400).send("400: " + e)
     }
     console.log(updatedFields)
