@@ -36,7 +36,6 @@ app.use('/class/:id', (req, res, next) => {
   if(req.method === 'DELETE') return middleware.noaccess(req, res, next, '/')
   next();
 })
-//
 app.use('/professor', (req, res, next) => {
   if(req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login')
   next();
@@ -49,7 +48,7 @@ app.use('/user/:user_name', (req, res, next) => {
   if(req.method === 'DELETE') return middleware.noaccess(req, res, next, '/')
   next();
 })
-app.use('/user/login', (req, res, next) => {
+app.use('/user/register', (req, res, next) => {
   if(req.method === 'GET' || req.method === 'POST') return middleware.notloggedin(req, res, next, '/user/profile');
   next();
 });
