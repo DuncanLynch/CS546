@@ -36,7 +36,7 @@ router
       return res.status(500).render("500: " + e)
     }
     try{
-      user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
+      user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name]).toLowerCase()
       password = validate(xss(req.body.password), validate_string, [validate_password])
     }catch(e){
       return res.status(400).send("400: " + e)
@@ -92,9 +92,9 @@ router.route('/register')
       return res.status(500).render("500: " + e)
     }
     try{
-      user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
+      user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name]).toLowerCase()
       password = validate(xss(req.body.password), validate_string, [validate_password])
-      email = validate(xss(req.body.email), validate_string, [validate_stevens_email])
+      email = validate(xss(req.body.email), validate_string, [validate_stevens_email]).toLowerCase()
     }catch(e){
       return res.status(400).send("400: " + e)
     }
@@ -133,7 +133,7 @@ router.route('/register')
 });
 router.route('/verify')
   .post(async (req, res) => {
-    const email = validate(xss(req.body.email), validate_string, [validate_stevens_email])
+    const email = validate(xss(req.body.email), validate_string, [validate_stevens_email]).toLowerCase()
     const codeEntered = validate(xss(req.body.code), validate_string, [only_numbers])
 
     const pending = pendingUsers.get(email);
@@ -227,7 +227,7 @@ router
       return res.status(500).send("500: " + e)
     }
     try{
-      user_name = validate(xss(req.params.user_name), validate_string, [validate_user_name])
+      user_name = validate(xss(req.params.user_name), validate_string, [validate_user_name]).toLowerCase()
     }catch(e){
       return res.status(400).send("400: " + e)
     }
@@ -249,7 +249,7 @@ router
     return res.status(500).send("500: " + e)
   }
   try{
-    user_name = validate(xss(req.params.user_name), validate_string, [validate_user_name])
+    user_name = validate(xss(req.params.user_name), validate_string, [validate_user_name]).toLowerCase()
   }catch(e){
     return res.status(400).send("400: " + e)
   }
