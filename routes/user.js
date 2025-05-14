@@ -43,7 +43,6 @@ router
     }
     if(user_name === null || password === null) return res.status(500).send("500: One or more inputs was not set in validation")
     try {
-
       const user = await userData.validateUser(user_name, password);
       const verificationCode = crypto.randomInt(100000, 999999).toString();
 
