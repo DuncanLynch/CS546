@@ -24,7 +24,6 @@ $(document).ready(function() {
         isValid = false;
         errorMessages.push('Please enter a valid stevens email.');
       }
-      console.log(isValid);
       if (!isValid) {
         $('form').append('<div id="errorMessages" style="color: red;"></div>');
         errorMessages.forEach(msg => {

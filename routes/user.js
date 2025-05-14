@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb';
 import nodemailer from 'nodemailer';
 const router = express.Router();
 const pendingUsers = new Map();
-import { process_id, validate, validate_password, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_number, validate_user_name, validate_prerequisites, validate_professor_name, validate_stevens_email} from "../validation.js";
+import { process_id, validate, validate_password, validate_string, only_numbers, process_numerical_rating, process_course_code, validate_number, validate_user_name, validate_prerequisites, validate_professor_name, validate_stevens_email} from "../validation.js";
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -16,8 +16,7 @@ const transporter = nodemailer.createTransport({
 });
 router
 .route('/login')
-.get(async (req, res) => {
-    
+.get(async (req, res) => { 
   try{
     if (!(Object.keys(req.body).length === 0)) {
       return res.status(400).send("400: Route was not expecting json");
@@ -126,8 +125,8 @@ router.route('/register')
 });
 router.route('/verify')
   .post(async (req, res) => {
-    const email = xss(req.body.email);
-    const codeEntered = xss(req.body.code);
+    const email = validate(xss(req.body.email), validate_string, [validate_stevens_email])
+    const codeEntered = validate(xss(req.body.code), validate_string, [only_numbers])
 
     const pending = pendingUsers.get(email);
      if (!pending) {

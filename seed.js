@@ -29,7 +29,7 @@ import {closeConnection, dbConnection} from './mongodb/mongoConnection.js';
     }
     try{
         var acraine_prof = await profData.createProfessor("Alexandra Craine", "SEED 101", "acraine@stevens.edu")
-        await classData.addProfessor("SEED 101", acraine_prof._id.toString())
+        await classData.addProfessor("SEED 101", acraine_prof._id)
         var ldecandi_prof = await profData.createProfessor("Lance Decandia", "SEED 221", "ldecandi@stevens.edu")
         await classData.addProfessor("SEED 221", ldecandi_prof._id)
         var dkim_prof = await profData.createProfessor("David Kim", "SEED 221", "dkim29@stevens.edu")
@@ -115,12 +115,29 @@ import {closeConnection, dbConnection} from './mongodb/mongoConnection.js';
                     [alan._id]: 1,
                     [gabe._id]: 1,
                     [dunc._id]: 1} } )
-
-
-
-        console.log("Seeing Complete")
         
     }catch(e){
         console.error("Reviews Seeding failed: " + e)
+    }
+    try{
+        const duncid = dunc._id.toString()
+        const lewisid = lewis._id.toString()
+        const alanid = alan._id.toString()
+        const gabeid = gabe._id.toString()
+        const acraineid = acraine_prof._id.toString()
+        const sroyid = sroy._id.toString()
+        const ldecandiid = ldecandi_prof._id.toString()
+        const dkimid = dkim_prof._id.toString() 
+        const tbussid = tbuss._id.toString()
+        await userData.addWishlist(duncid, acraineid)
+        await userData.addWishlist(duncid, sroyid)
+        await userData.addWishlist(lewisid, ldecandiid)
+        await userData.addWishlist(gabeid, tbussid)
+        await userData.addWishlist(alanid, ldecandiid)
+        await userData.addWishlist(lewisid, dkimid)
+        await userData.addWishlist(lewisid, ldecandiid)
+        console.log("Seeing Complete")
+    }catch(e){
+        console.error("Wishlist Seeding failed: " + e)
     }
     await closeConnection();

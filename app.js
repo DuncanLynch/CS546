@@ -65,20 +65,16 @@ app.use('/user/profile', (req, res, next) => {
   if(req.method === 'GET' || req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login');
   next();
 });
-/*
-app.use('/reviews/:classId', (req, res, next) => {
-  if(req.method === 'POST') return middleware.loggedin_no_owner(req, res, next, '/')
-    next();
-})
-app.use('/reviews//review/:id', (req, res, next) => {
-  if(req.method === 'DELETE') return middleware.loggedin_owner(req, res, next, '/')
+
+app.use('/reviews/review/:id', (req, res, next) => {
+  if(req.method === 'DELETE') return middleware.noaccess(req, res, next, '/')
   next();
 })
-app.use('/reviews/review/:reviewId/comments', (req, res, next) => {
-  if(req.method === 'POST') return middleware.loggedin(req, res, next, '/user/login')
+app.use('/reviews/comment/:id', (req, res, next) => {
+  if(req.method === 'POST') return middleware.rateLimitComments(req, res, next)
   next();
 })
-*/
+
 const hbs = exphbs.create({
   helpers: {
     json: function (context) {
@@ -91,6 +87,15 @@ const hbs = exphbs.create({
 app.use('/public', express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/reviews/:classId', (req, res, next) => {
+  app.use(express.json());
+  if(req.method === 'POST') {
+    if(!req.body.commentText) {
+    return middleware.reviews_mw(req, res, next, '/user/login')
+    }
+  }
+    next();
+})
 app.use(rewriteUnsupportedBrowserMethods);
 
 // Set up Handlebars engine with layout directory
