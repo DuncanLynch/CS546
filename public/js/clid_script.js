@@ -214,11 +214,20 @@ $(document).ready(function () {
       dataType: 'json',
       success: function (data) {
         const reviewWords = $('#review').val().split(/\s+/);
+        const reviewTitleWords = $('#review-title').val().split(/\s+/);
         for (const word of reviewWords) {
           if (data.includes(word.toLowerCase())) {
-            console.log(word);
             errorDiv.append(`<p class='error'>Please no profanity!</p>`);
             $('#review').val('');
+            $('#review-form').append(errorDiv);
+            return;
+          }
+        }
+        for (const word of reviewTitleWords) {
+          if (data.includes(word.toLowerCase())) {
+            errorDiv.append(`<p class='error'>Please no profanity!</p>`);
+            $('#review').val('');
+            $('#review-form').append(errorDiv);
             return;
           }
         }
@@ -257,7 +266,6 @@ $(document).ready(function () {
                 window.location.reload();
               },
               error: function (response) {
-                console.log(response);
                 $(".error").remove();
                 $('#review-form').append(`<p class='error'>Failed to submit review. ${response.responseJSON.error}</p>`);
               }
