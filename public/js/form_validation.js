@@ -1,29 +1,27 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const signinForm = document.getElementById('signin-form');
-    if (signinForm) {
-        signinForm.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent form submission
-            const user_name = document.getElementById('user_name').value.trim();
-            const password = document.getElementById('password').value.trim();
-            if (!user_name || !password) {
-                alert("Username and Password are required.");
-                return;
-            }
-            try {
-                const response = await axios.post('/user/login', {
-                    user_name,
-                    password
-                });
-                window.location.href = "/";
-            } catch (error) {
-                if (error.response && error.response.status === 401) {
-                    alert("Invalid username or password.");
-                } else if (error.response?.data?.message) {
-                    alert("Error: " + error.response.data.message);
-                } else {
-                    alert("An unexpected error occurred.");
-                }
-            }
+$(document).ready(function() {
+    $('#signin-form').on('submit', function(e) {
+      
+      $('#errorMessages').remove();
+      const userName = $('#user_name').val().trim();
+      const password = $('#password').val().trim();
+      let isValid = true;
+      let errorMessages = [];
+      if (!userName) {
+        isValid = false;
+        errorMessages.push('Username is required.');
+      }
+      if (!password) {
+        isValid = false;
+        errorMessages.push('Password is required.');
+      }
+      if (!isValid) {
+        e.preventDefault();
+        $('form').append('<div id="errorMessages" style="color: red;"></div>');
+        errorMessages.forEach(msg => {
+          $('#errorMessages').append('<p>' + msg + '</p>');
         });
-    }
-});
+        return;
+      }
+    });
+  });
+  

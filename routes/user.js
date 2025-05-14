@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb';
 import nodemailer from 'nodemailer';
 const router = express.Router();
 const pendingUsers = new Map();
-import { process_id, validate, validate_password, validate_string, process_unsignedint, process_numerical_rating, process_course_code, validate_number, validate_user_name, validate_prerequisites, validate_professor_name, validate_stevens_email} from "../validation.js";
+import { process_id, validate, validate_password, validate_string, only_numbers, process_numerical_rating, process_course_code, validate_number, validate_user_name, validate_prerequisites, validate_professor_name, validate_stevens_email} from "../validation.js";
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -16,8 +16,7 @@ const transporter = nodemailer.createTransport({
 });
 router
 .route('/login')
-.get(async (req, res) => {
-    
+.get(async (req, res) => { 
   try{
     if (!(Object.keys(req.body).length === 0)) {
       return res.status(400).send("400: Route was not expecting json");
@@ -28,42 +27,48 @@ router
   }
 })
 .post(async (req, res) => {
-  let user_name, password = null;
-  try{
-    if (!req.body || !(Object.keys(req.body).length === 2)) {
-      return res.status(400).send("400: Invalid length of json");
+    let user_name, password;
+    try{
+      if (!req.body || !(Object.keys(req.body).length === 2)) {
+        return res.status(400).send("400: Invalid length of json");
+      }
+    }catch(e){
+      return res.status(500).render("500: " + e)
     }
-  }catch(e){
-    return res.status(500).render("500: " + e)
-  }
-  try{
+    try{
       user_name = validate(xss(req.body.user_name), validate_string, [validate_user_name])
       password = validate(xss(req.body.password), validate_string, [validate_password])
-  }catch(e){
-      return res.status(400).send("400: " + e)
-  }
-  if(user_name === null || password === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    try{
-        const loginUser = await userData.validateUser(user_name, password); //assuming return value of validate user is the user object
-        req.session.user = {
-            user_name: loginUser.user_name, 
-            _id: loginUser._id.toString(), 
-            email: loginUser.email, 
-            reviews: loginUser.reviews,
-            wishlist: loginUser.wishlist
-        }
-        res.locals.user_logged = true;
-
-        //2fa here later
-
-        return res.status(200).redirect('/user/profile');
-        //return res.status(200).send(loginUser)
     }catch(e){
-        return res.status(401).json("401: " + e) //update error
+      return res.status(400).send("400: " + e)
     }
+    if(user_name === null || password === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    try {
 
-})
+      const user = await userData.validateUser(user_name, password);
+      const verificationCode = crypto.randomInt(100000, 999999).toString();
 
+      pendingUsers.set(user.email, {
+        loggingin: true,
+        user_name,
+        password,
+        code: verificationCode,
+        timestamp: Date.now()
+      });
+
+      await transporter.sendMail({
+        from: '"Course Review" <your_email@gmail.com>',
+        to: user.email,
+        subject: 'Your verification code',
+        text: `Hi ${user_name}, your verification code is: ${verificationCode}`
+      });
+
+      return res.status(200).render('verify', { email: user.email });
+
+    } catch (e) {
+      console.log(e)
+      return res.status(500).send("500: " + e);
+    }
+});
 
 router.route('/register')
 .get((req, res) => {
@@ -106,6 +111,7 @@ router.route('/register')
       const verificationCode = crypto.randomInt(100000, 999999).toString();
 
       pendingUsers.set(email, {
+        loggingin: false,
         user_name,
         password,
         code: verificationCode,
@@ -127,8 +133,8 @@ router.route('/register')
 });
 router.route('/verify')
   .post(async (req, res) => {
-    const email = xss(req.body.email);
-    const codeEntered = xss(req.body.code);
+    const email = validate(xss(req.body.email), validate_string, [validate_stevens_email])
+    const codeEntered = validate(xss(req.body.code), validate_string, [only_numbers])
 
     const pending = pendingUsers.get(email);
      if (!pending) {
@@ -145,19 +151,42 @@ router.route('/verify')
     }
 
     try {
-      const created = await userData.createUser(pending.user_name, pending.password, email);
-      pendingUsers.delete(email); // clean up
+      if (pending.loggingin) {
+        const us = await userData.getUserByName(pending.user_name)
+        pendingUsers.delete(email); // clean up
+        req.session.user = {
+            user_name: us.user_name, 
+            _id: us._id.toString(), 
+            email: us.email, 
+            reviews: us.reviews,
+            wishlist: us.wishlist
+        }
+        res.locals.user_logged = true;
 
-      return res.status(200).render('login', {
-        message: 'Registration complete! You can now log in.'
-      });
+        //2fa here later
+
+        return res.status(200).render('homepage');
+      } 
+      else {
+        const us = await userData.createUser(pending.user_name, pending.password, email);
+        pendingUsers.delete(email); // clean up
+        req.session.user = {
+            user_name: us.user_name, 
+            _id: us._id.toString(), 
+            email: us.email, 
+            reviews: us.reviews,
+            wishlist: us.wishlist
+        }
+        res.locals.user_logged = true;
+        return res.status(200).render('homepage');
+      } 
     } catch (e) {
       console.error("Account creation failed:", e);
       return res.status(500).render('verify', {
         email,
         error: 'Server error during account creation. Please try again.'
       });
-    }
+  }
 });
 
 router

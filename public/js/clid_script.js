@@ -124,12 +124,18 @@ $(document).ready(function () {
           </div>
         </div>
         <div class="review-footer">
-          <button class="like-button" data-id="${review._rid}">👍 ${review.likes || 0}</button>
-          <button class="dislike-button" data-id="${review._rid}">👎 ${review.dislikes || 0}</button>
+          <div id="like-col">
+            <div class="like-row">
+              <button class="like-button" data-id="${review._rid}">👍 ${review.likes || 0}</button>
+              <button class="dislike-button" data-id="${review._rid}">👎 ${review.dislikes || 0}</button>
+            </div>  
+          </div>
         </div>
         <div class="comments-section">
-          <h5>Comments</h5>
-          ${commentHTML || "<p id='nocom'>No comments yet.</p>"}
+        <h5>Comments</h5>
+          <div class="overflow-container">
+            ${commentHTML || "<p id='nocom'>No comments yet.</p>"}
+          </div>
           <form class="comment-form" id="${review._rid}">
             <input type="text" name="commentText" placeholder="Add a comment" required />
             <button type="submit">${userData ? 'Post' : 'You Must Be Logged in to Post A Comment!'}</button>
@@ -205,11 +211,11 @@ $(document).ready(function () {
       errorMessages.push('Quality rating must be a number between 1 and 5.');
     }
 
- 
+    const errorDiv = $('<div id="errorMessages">');
     if (errorMessages.length > 0) {
-      const errorDiv = $('<div id="errorMessages">');
+      
       errorMessages.forEach(function (msg) {
-        errorDiv.append(`<p class='error'>'${msg}'</p>`);
+        errorDiv.append(`<p class='error'>${msg}</p>`);
       });
       $('#review-form').append(errorDiv);
       return;
@@ -223,7 +229,7 @@ $(document).ready(function () {
         const reviewWords = $('#review').val().split(/\s+/);
         for (const word of reviewWords) {
           if (data.includes(word.toLowerCase())) {
-            alert('Please no profanity.');
+            errorDiv.append(`<p class='error'>Please no profanity!</p>`);
             $('#review').val('');
             return;
           }
@@ -258,17 +264,19 @@ $(document).ready(function () {
                 withCredentials: true
               },
               success: function () {
-                alert('Review submitted successfully!');
+                errorDiv.append(`<p>Review submitted successfully!</p>`);
                 $('#review-form')[0].reset();
                 window.location.reload();
               },
               error: function () {
-                alert('Failed to submit review. Please try again.');
+                $(".error").remove();
+                errorDiv.append(`<p>Failed to submit review. Please try again.</p>`);
               }
             });
           },
           error: function () {
-            alert('Failed to fetch professor ID. Please try again.');
+            $(".error").remove();
+            errorDiv.append(`<p>Failed to fetch professor ID. Please try again.</p>`);
           }
         });
       }
@@ -293,9 +301,10 @@ $(document).ready(function () {
         let likers = response.likers;
         const status = likers[id];
         
-
+        const reviewFooter = $(`.like-button[data-id="${reviewId}"]`).closest('div')
         if (like == status) {
-          alert('You cannot ' + (isLike ? 'like' : 'dislike') + ' more than once! Your passion is much appreciated though.');
+          $(".error").remove();
+          reviewFooter.append('<p class="error">You cannot ' + (isLike ? 'like' : 'dislike') + ' more than once!</p>');
           return;
         }
 
@@ -328,14 +337,17 @@ $(document).ready(function () {
           success: function () {
             $(`.like-button[data-id="${reviewId}"]`).html(`👍 ${likes}`);
             $(`.dislike-button[data-id="${reviewId}"]`).html(`👎 ${dislikes}`);
+            $(".error").remove();
           },
           error: function () {
-            alert('Failed to update review. Please try again.');
+            $(".error").remove();
+            $('#like-col').append('<p class="error">Failed to like the review!</p>');
           }
         });
       },
       error: function () {
-        alert('Failed to fetch review data. Please try again.');
+        $(".error").remove();
+        $('.review-container').append('<p class="error">Failed to fetch the review data!</p>');
       }
     });
   });
@@ -352,43 +364,56 @@ $(document).ready(function () {
     const reviewerName = form.closest('li').data('reviewer-name');
 
 
-    if (!commentText) return;
-    const checkBadWords = (text) => {
-      const lowerText = text.toLowerCase();
-      return bad_words.some((word) => lowerText.includes(word));
-    };
-    let errorMessages = [];
-    if (checkBadWords(commentText)) {
-      errorMessages.push("Comment contains inappropriate language.");
-    }
-    if (errorMessages.length > 0) {
-      errorMessages.forEach(function (msg) {
-        form.append(`<p class='error'>'${msg}'</p>`);
-      });
-      return
-    }
+    
     $.ajax({
-      url: `/reviews/comment/${reviewId}`,
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        classId: classData._id,
-        commentText: commentText, 
-        reviewer: reviewerName,
-      }),
-      success: function (newComment) {
-        $('#nocom').hide();
-        const commentHTML = `
-          <div class="comment">
-            <p><span class='strong'>${userData.user_name}</span> (${new Date().toISOString().substring(0,10)}):</p>
-            <p>${commentText}</p>
-          </div>
-        `;
-        form.before(commentHTML);
-        form[0].reset();
-      },
-      error: function (error) {
-        alert(`Failed to post comment.`);
+      url: 'https://raw.githubusercontent.com/zacanger/profane-words/master/words.json',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) { 
+        let errorMessages = [];
+        const commentWords = commentText.split(/\s+/);
+        let badword = false;
+        for (const word of commentWords) {
+          if (data.includes(word.toLowerCase())) {
+            badword = true;
+          }
+        }
+        if (badword) {
+            errorMessages.push('Please no profanity.');
+            form.find('input[name="commentText"]').val('');
+        }
+        if (errorMessages.length > 0) {
+          errorMessages.forEach(function (msg) {
+            form.append(`<p class='error'>${msg}</p>`);
+          });
+          return
+        }
+        $.ajax({
+          url: `/reviews/comment/${reviewId}`,
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            classId: classData._id,
+            commentText: commentText, 
+            reviewer: reviewerName,
+          }),
+         success: function (newComment) {
+            $('#nocom').hide();
+            const commentHTML = `
+              <div class="comment">
+                <p><span class='strong'>${userData.user_name}</span> (${new Date().toISOString().substring(0,10)}):</p>
+                <p>${commentText}</p>
+              </div>
+            `;
+            form.before(commentHTML);
+            form[0].reset();
+            $(".error").remove();
+          },
+          error: function (error) {
+            $(".error").remove();
+            form.append(`<p class='error'>Failed to post comment</p>`);
+          }
+        });
       }
     });
   });
@@ -408,7 +433,6 @@ $(document).ready(function () {
           button.text("❌ Already Added!");
       },
       error: function(e){
-        alert(`${userData._id}, ${id}`);
       }
     });
   });

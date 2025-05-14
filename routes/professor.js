@@ -25,7 +25,6 @@ router
     }
 })
 .post(async (req, res) => {
-    console.log("POST Caught!");
     let professor_name, course_code, email = null;
     try{
         if (!req.body || !(Object.keys(req.body).length === 3)) {

@@ -63,9 +63,6 @@ $(document).ready(function () {
       });
     });
   }
-
-  console.log(userData);
-
   const wishlistContainer = $(".wishlist-container");
 
   if (!wishlistContainer || userData.wishlist.length === 0) {

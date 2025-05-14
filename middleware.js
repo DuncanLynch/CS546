@@ -1,14 +1,15 @@
-
 import express from 'express';
 import * as classData from './data/classes.js'
 import xss from 'xss'
+import { validate_professor_name, process_course_code, process_id, validate, validate_string } from './validation.js';
 
 const reviewAttempts = {}
-
+const commentAttempts = {}
 const REVIEW_LIMIT = 5;
+const COMMENT_LIMIT = 5;
 const WINDOW_MS = 60 * 1000;
 
-function rateLimitReviews(req, res, next) {
+export const rateLimitReviews = (req, res, next) => {
   if (!req.session.user) {
     return res.status(401).json({error: "User not logged in to review."});
   }
@@ -26,7 +27,43 @@ function rateLimitReviews(req, res, next) {
 
   next();
 }
+export const rateLimitComments = (req, res, next) => {
+    if (!req.session.user) {
+      return res.status(401).json({error: "User not logged in to comment."});
+    }
+    const user_name = req.session.user.user_name;
+    const now = Date.now();
+    if (!commentAttempts[user_name]) {
+      commentAttempts[user_name] = [];
+    }
+    commentAttempts[user_name] = commentAttempts[user_name].filter(timestamp => now - timestamp < WINDOW_MS);
+  
+    if (commentAttempts[user_name].length >= COMMENT_LIMIT) {
+      return res.status(402).json({ error: 'Too many comment attempts. Please try again later.' });
+    }
+    commentAttempts[user_name].push(now);
+    next();
+  }
+export const reviews_mw = (req, res, next, redirect) => {
+    if(!req.session.user) {
+        return res.redirect(redirect)
+    }
+    let cc, prof = null;
+    try{
+        cc = validate(xss(req.body.course_code), validate_string, [process_course_code])
+        prof = validate(xss(req.body.professor_id), validate_string, [process_id])
+    }catch(e){
+        return res.status(400).send("400: " + e)
+    }
+    if(cc === null || prof === null) return res.status(500).send("500: One or more inputs was not set in validation")
+    for(let i = 0; i < req.session.user.reviews.length; i++){
+        if( (req.session.user.reviews[i].course_code == cc) && (req.session.user.reviews[i].professor_id == prof) ) {
+            return res.status(403).json({ error: 'You can only submit one review per professor for each class.' });
 
+        }
+    }
+    next(); 
+}
 //gonna need more
 export const notloggedin = (req, res, next, redirect) => {
     if (req.session.user) {
@@ -37,8 +74,6 @@ export const notloggedin = (req, res, next, redirect) => {
 export const loggedin = (req, res, next, redirect) => {
     if(!req.session.user) {
         return res.redirect(redirect)
-        return res.redirect('/');
-
     }
     next();
 };
@@ -47,45 +82,3 @@ export const noaccess = (req, res, next, redirect) => {
     return res.redirect(redirect);
 
 }
-/*
-export const loggedin_no_owner = async (req, res, next, redirect) => {
-    if(!req.session.user) {
-        return res.redirect(redirect)
-    }
-    const cl = await classData.getClassById(req.params.classId)
-    const reviews = cl.reviews
-    for(let i = 0; i<reviews.length; i++){
-        if(reviews[i].reviewer_id == req.session.user._id) return res.redirect(redirect)
-    }
-    next();
-}
-export const loggedin_owner = async (req, res, next, redirect) => {
-    if(!req.session.user) {
-        return res.redirect(redirect)
-    }
-    let tog = 0
-    for(let i = 0; i <req.session.user.reviews.length; i++){
-        for(let j = 0; j < req.session.user.reviews[i].reviews.length; j++){
-            if(req.session.user.reviews[i].reviews[j]._rid == req.params.id) tog = 1
-        }
-    }
-    if(tog !== 1) return res.redirect(redirect)
-    next()
-}
-export const loggedin_no_owner_profs = async (req, res, next, redirect) => {
-    if(!req.session.user) {
-        return res.redirect(redirect)
-    }
-    let tog = 1
-    for(let i = 0; i <req.session.user.reviews.length; i++){
-        for(let j = 0; j < req.session.user.reviews[i].reviews.length; j++){
-            if(req.session.user.reviews[i].reviews[j].course_code == xss(req.body.course_code)) tog = 0
-            console.log(req.session.user.reviews[i].reviews[j].course_code)
-            console.log(req.body.course_code)
-        }
-    }
-    if(tog !== 1) {
-        console.log("dink")
-        return res.redirect(redirect)}
-    next()
-}*/

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { createClass } from './data/classes.js';
-
+import { closeConnection } from './mongodb/mongoConnection.js';
 async function parseCourse(link, code) {
     try {
         const response = await axios.get(link);
@@ -57,6 +57,7 @@ async function main() {
     } catch (error) {
         console.error("Failed to fetch catalog JSON:", error.message);
     }
+    closeConnection();
 }
 
 main();

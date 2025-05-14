@@ -34,7 +34,7 @@ export async function createUser(user_name, password, email) {
     const insertResult = await userCollection.insertOne(newUser);
     if (!insertResult.acknowledged) throw new Error("Failed to create user.");
 
-    return { _id: insertResult.insertedId, user_name, email };
+    return { _id: insertResult.insertedId, user_name, email, reviews: [], wishlist: [] };
 }
 
 export async function getUserByName(user_name) {
@@ -43,6 +43,14 @@ export async function getUserByName(user_name) {
     const user = await userCollection.findOne({ user_name });
     if (!user) throw new Error("User not found.");
     return user;
+}
+
+export async function getEmailByUser(user_name) {
+    validate(user_name, validate_string, [validate_user_name]);
+    const userCollection = await users();
+    const user = await userCollection.findOne({ user_name });
+    if (!user) throw new Error("User not found.");
+    return user.email;
 }
 
 export async function getAllUsers() {

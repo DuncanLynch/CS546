@@ -100,7 +100,6 @@ router
                 });
             }
             else {
-                console.log(updatedFields);
                 return res.status(400).send("400: Unexpected key in updatedFields");
             }
         }
@@ -108,7 +107,6 @@ router
         console.log(e);
         return res.status(400).send("400: " + e)
     }
-    console.log(updatedFields)
     try{
         updatedReview = await classData.updateReview(course_code, rid, updatedFields) ;  
     }catch (e){
@@ -180,42 +178,6 @@ router
 
 })
 router
-.route('/review/:reviewId/comments/:commentId')//fix
-.get(async (req, res) => {
-    let id, commentId = null;
-    try{
-        if (!(Object.keys(req.body).length === 0)) {
-            return res.status(400).send("400: Route was not expecting json");
-        }
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-    try{
-        id = validate(xss(req.params.reviewId), validate_string, [process_id])
-        commentId = validate(xss(req.params.commentId), validate_string, [process_id])
-    }catch(e){
-        return res.status(400).send("400: " + e)
-    }
-    if (id === null || commentId === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    let reviewobj = null;
-    try{
-        const classList = await classData.getAllClasses()
-        for(let i = 0; i<classList.length; i++){
-            for(let j = 0; j<classList[i].reviews.length; j++){
-                if(classList[i].reviews[j]._rid.toString() == id.toString()) reviewobj = classList[i].reviews[j]
-            }
-        }
-        if(reviewobj === null) return res.status(404).send("404: Review not found so can't return comments")
-        for(let i = 0; i<reviewobj.comments.length; i++){
-            if(reviewobj.comments[i]._id === commentId) return res.status(200).send(reviewobj.comments[i])
-        }
-        return res.status(404).send("404: Comment not found inside review")
-    }catch(e){
-        return res.status(500).send("500: " + e)
-    }
-})
-
-router
 .route('/:classId')
 .get(async (req, res) => {
     let classId = null;
@@ -241,7 +203,6 @@ router
     }
 })
 .post(async (req, res) => {
-    console.log("hi");
     let classId, course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name = null
     try{
         if (!req.body || !(Object.keys(req.body).length === 10)) {
@@ -266,11 +227,11 @@ router
         return res.status(400).send("400: " + e)
     }
     if (classId === null || course_code === null || professor_id === null || review_title === null || reviewer_id === null || review_date === null || review_contents === null || review_quality_rating === null || review_difficulty_rating === null || review_total_rating === null || user_name === null) return res.status(500).send("500: One or more inputs was not set in validation")
-    console.log("post review")
     try{
         const _rid = new ObjectId();
         const newReview = await classData.addReview({course_code, professor_id, review_title, reviewer_id, review_date, review_contents, review_quality_rating, review_difficulty_rating, review_total_rating, user_name, _rid: _rid.toString() })
         await userData.addReview(user_name, newReview) //awaiting on this function, update param upon duncan push
+        if(req.session.user) req.session.user.reviews.push(newReview);
         return res.status(200).send(newReview)
     }catch(e){
         console.log(e);
@@ -280,33 +241,41 @@ router
 router
 .route('/comment/:id')
 .post(async (req, res) => {
-  try {
-    const reviewId = validate(xss(req.params.id), validate_string, [process_id]);
-    const commentText = xss(req.body.commentText);
-    const classId = xss(req.body.classId)
-    const reviewer = xss(req.body.reviewer)
-    if (!req.session || !req.session.user) {
-      return res.status(401).json({ error: 'User must be logged in to comment.' });
+    let reviewId, classId, reviewer, commentText = null
+    try{
+        if (!req.body || !(Object.keys(req.body).length === 3)) {
+            return res.status(400).send("400: Invalid length of json");
+        }
+    }catch(e){
+        return res.status(500).send("500: " + e)
     }
-
-    const user_name = validate(req.session.user.user_name, validate_string, [validate_user_name]);
-
-    let userSuccess = false;
-    let classSuccess = false;
-    const commentId = new ObjectId();
-    classSuccess = await classData.addComment(user_name, reviewId, classId, commentText, commentId);
-    userSuccess = await userData.addComment(user_name, reviewId, commentText, commentId, reviewer);
-
-    if (!userSuccess && !classSuccess) {
-      return res.status(500).json({ error: 'Failed to add comment to both user and class records.' });
+    try{
+        reviewId = validate(xss(req.params.id), validate_string, [process_id]);
+        commentText = validate(xss(req.body.commentText), validate_string, []);
+        classId = validate(xss(req.body.classId), validate_string, [process_id]);
+        reviewer = validate(xss(req.body.reviewer), validate_string, [validate_user_name]);
+    }catch(e){
+        return res.status(400).send("400: " + e)
     }
-
-    return res.status(200).json({ message: 'Comment added successfully.'});
-
-  } catch (e) {
-    console.log(e);
-    return res.status(400).json({ error: e.message });
-  }
-});
+    try{
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ error: 'User must be logged in to comment.' });
+        }
+        const user_name = validate(req.session.user.user_name, validate_string, [validate_user_name]);
+        let userSuccess = false;
+        let classSuccess = false;
+        const commentId = new ObjectId();
+        classSuccess = await classData.addComment(user_name, reviewId, classId, commentText, commentId.toString());
+        userSuccess = await userData.addComment(user_name, reviewId, commentText, commentId.toString(), reviewer);
+        
+        if (!userSuccess && !classSuccess) {
+          return res.status(500).json({ error: 'Failed to add comment to both user and class records.' });
+        }
+    
+        return res.status(200).json({ message: 'Comment added successfully.'});
+    }catch(e){
+        return res.status(500).send("500: " + e)
+    }
+})
 
 export default router;
