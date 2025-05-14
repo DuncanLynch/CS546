@@ -64,7 +64,6 @@ export const reviews_mw = (req, res, next, redirect) => {
     }
     next(); 
 }
-//gonna need more
 export const notloggedin = (req, res, next, redirect) => {
     if (req.session.user) {
       return res.redirect(redirect);

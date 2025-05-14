@@ -178,19 +178,6 @@ $(document).ready(function () {
       errorMessages.push("Email must be a valid stevens.edu address.");
     }
 
-    const checkBadWords = (text) => {
-      const lowerText = text.toLowerCase();
-      return bad_words.some((word) => lowerText.includes(word));
-    };
-
-    if (checkBadWords(title)) {
-      errorMessages.push("Review title contains inappropriate language.");
-    }
-    if (checkBadWords(reviewContents)) {
-      errorMessages.push("Review content contains inappropriate language.");
-    }
-
-
     if (!title) {
       errorMessages.push('Review title is required.');
     }
@@ -229,6 +216,7 @@ $(document).ready(function () {
         const reviewWords = $('#review').val().split(/\s+/);
         for (const word of reviewWords) {
           if (data.includes(word.toLowerCase())) {
+            console.log(word);
             errorDiv.append(`<p class='error'>Please no profanity!</p>`);
             $('#review').val('');
             return;
@@ -268,15 +256,16 @@ $(document).ready(function () {
                 $('#review-form')[0].reset();
                 window.location.reload();
               },
-              error: function () {
+              error: function (response) {
+                console.log(response);
                 $(".error").remove();
-                errorDiv.append(`<p>Failed to submit review. Please try again.</p>`);
+                $('#review-form').append(`<p class='error'>Failed to submit review. ${response.responseJSON.error}</p>`);
               }
             });
           },
           error: function () {
             $(".error").remove();
-            errorDiv.append(`<p>Failed to fetch professor ID. Please try again.</p>`);
+            $('#review-form').append(`<p class='error'>Failed to fetch professor ID. Please try again.</p>`);
           }
         });
       }
@@ -405,7 +394,7 @@ $(document).ready(function () {
                 <p>${commentText}</p>
               </div>
             `;
-            form.before(commentHTML);
+            form.closest('div').find('.overflow-container').append(commentHTML);
             form[0].reset();
             $(".error").remove();
           },
