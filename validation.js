@@ -65,7 +65,7 @@ export const process_numerical_rating = (rating) => {
 export const process_course_code = (course_code) => {
     course_code = validate_string(course_code);
     const match = course_code.match(/^([A-Z]{1,4})\s(\d{3})$/);
-    if (!match) throw "Invalid course code!";
+    if (!match) throw new Error("Invalid course code!");
     return course_code;
 };
 

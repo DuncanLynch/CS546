@@ -23,7 +23,6 @@ import {closeConnection, dbConnection} from './mongodb/mongoConnection.js';
         var lewis = await userData.createUser("100usd", "r0utesguy", "lgoldenb@stevens.edu")
         var alan = await userData.createUser("circ4", "2f@clutch", "amanjarr@stevens.edu")
         var gabe = await userData.createUser("gab05", "gabeisgame", "gcastill@stevens.edu")
-        var pat = await userData.createUser("girrafxnyc", "546aideniscool554", "phill@stevens.edu")
     }catch(e){
         console.error("User Seeding failed: "+ e)
     }
@@ -82,8 +81,6 @@ import {closeConnection, dbConnection} from './mongodb/mongoConnection.js';
         await userData.addReview(gabe.user_name, review_four)
         const comfour = await classData.addComment(lewis.user_name, review_four._rid, seed221._id, "Yeah, I lived with this guy for a whole year, and he cares about hockey almost as much as I care about league...", new ObjectId().toString())
         await userData.addComment(lewis.user_name, review_four._rid, comfour.text, comfour._id, review_four.reviewer_name)
-        const review_five = await classData.addReview({course_code: "SEED 222", professor_id: acraine_prof._id.toString(), review_title: "Difficult, but worth it", reviewer_id: pat._id.toString(), review_date:"2025-05-05", review_contents: "Professor Craine taught me a lot about how to use statistics to avoid bias in seeding.", review_difficulty_rating: 5, review_quality_rating: 5, review_total_rating: 4, user_name: pat.user_name, _rid: (new ObjectId).toString()})
-        await userData.addReview(pat.user_name, review_five)
         const review_six = await classData.addReview({course_code: "SEED 365", professor_id: sroy._id.toString(), review_title: "Shreya The Goat", reviewer_id: gabe._id.toString(), review_date:"2025-05-03", review_contents: "Shreya's classes are always easy and very informational, must take.", review_difficulty_rating: 2, review_quality_rating: 4, review_total_rating: 5, user_name: gabe.user_name, _rid: (new ObjectId).toString()})
         await userData.addReview(gabe.user_name, review_six)
         const review_seven = await classData.addReview({course_code: "SEED 221", professor_id: dkim_prof._id.toString(), review_title: "Never shows up to lecture", reviewer_id: alan._id.toString(), review_date:"2025-05-09", review_contents: "Never shows up to class, class wonders if he's even real. Very easy A though.", review_difficulty_rating: 1, review_quality_rating: 1, review_total_rating: 3, user_name: alan.user_name, _rid: (new ObjectId).toString()})
@@ -93,25 +90,21 @@ import {closeConnection, dbConnection} from './mongodb/mongoConnection.js';
         const review_nine = await classData.addReview({course_code: "SEED 221", professor_id: dkim_prof._id.toString(), review_title: "HAPPY BIRTHDAY DAVID", reviewer_id: lewis._id.toString(), review_date:"2025-05-14", review_contents: "ITS MY BOYS BIRTHDAY TODAY HAPPY BIG 20 DAVID!", review_difficulty_rating: 5, review_quality_rating: 5, review_total_rating: 5, user_name: lewis.user_name, _rid: (new ObjectId).toString()})
         await userData.addReview(lewis.user_name, review_nine)
 
-        await classData.updateReview(review_one.course_code, review_one._rid, {likes: 2, dislikes: 1, 
+        await classData.updateReview(review_one.course_code, review_one._rid, {likes: 2, dislikes: 0, 
             likers:{[dunc._id]: 1,
-                    [pat._id]: 0,
                     [alan._id]: 1} } )
-        await classData.updateReview(review_two.course_code, review_two._rid, {likes: 4, dislikes: 0, 
+        await classData.updateReview(review_two.course_code, review_two._rid, {likes: 3, dislikes: 0, 
             likers:{[dunc._id]: 1,
-                    [pat._id]: 1,
                     [alan._id]: 1,
                     [gabe._id]: 1} } )
-        await classData.updateReview(review_three.course_code, review_three._rid, {likes: 3, dislikes: 0,
+        await classData.updateReview(review_three.course_code, review_three._rid, {likes: 2, dislikes: 0,
             likers:{[lewis._id]: 0,
-                    [pat._id]: 1,
                     [alan._id]: 1,
                     [gabe._id]: 1} } )
         await classData.updateReview(review_four.course_code, review_four._rid, {likes: 1, dislikes: 0,
             likers:{[lewis._id]: 1 }} )
-        await classData.updateReview(review_nine.course_code, review_nine._rid, {likes: 5, dislikes: 0,
+        await classData.updateReview(review_nine.course_code, review_nine._rid, {likes: 4, dislikes: 0,
             likers:{[lewis._id]: 1,
-                    [pat._id]: 1,
                     [alan._id]: 1,
                     [gabe._id]: 1,
                     [dunc._id]: 1} } )
