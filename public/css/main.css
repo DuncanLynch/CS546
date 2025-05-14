@@ -606,3 +606,22 @@ form#review-form label {
 .strong {
     font-weight: bolder;
 }
+
+.welcome h1{
+  font-size: 3em;
+  color: #3d0d01;
+  font-style: bolder;
+  text-align: center;
+}
+
+.welcome p{
+  text-align: center;
+}
+
+.funLine{
+  width: 200px;
+  height: 4px;
+  background-color: #3d0d01;
+  margin: -2rem auto 1rem;
+  border-radius: 2px;
+}

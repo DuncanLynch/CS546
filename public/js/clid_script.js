@@ -2,6 +2,7 @@ $(document).ready(function () {
   let activeButton = "0";
 
   $('#0').on('click', function () {
+    $('#wishlist-container').empty().hide() //hide add to wishlist when on all Professors
     $('.review-container li').show(); // Show all reviews
 
     if (activeButton) {
@@ -63,7 +64,7 @@ $(document).ready(function () {
                   ⭐ Add <b>${professor.professor_name}</b> to Wishlist
                 </button>
               `);
-              $('#wishlist-container').empty().append(wishlistButton);
+              $('#wishlist-container').empty().append(wishlistButton).show();
             });
 
             $('.professor-buttons').append(button);
