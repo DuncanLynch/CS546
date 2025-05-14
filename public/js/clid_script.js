@@ -217,7 +217,7 @@ $(document).ready(function () {
         const reviewTitleWords = $('#review-title').val().split(/\s+/);
         for (const word of reviewWords) {
           if (data.includes(word.toLowerCase())) {
-            errorDiv.append(`<p class='error'>Please no profanity!</p>`);
+            errorDiv.append(`<p class='error'>Please no profanity in the review!</p>`);
             $('#review').val('');
             $('#review-form').append(errorDiv);
             return;
@@ -225,7 +225,7 @@ $(document).ready(function () {
         }
         for (const word of reviewTitleWords) {
           if (data.includes(word.toLowerCase())) {
-            errorDiv.append(`<p class='error'>Please no profanity!</p>`);
+            errorDiv.append(`<p class='error'>Please no profanity in the title!</p>`);
             $('#review').val('');
             $('#review-form').append(errorDiv);
             return;
