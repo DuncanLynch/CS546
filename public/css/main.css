@@ -153,6 +153,14 @@ form label {
      1px  1px 0 black;
 }
 
+textarea {
+  max-width: 100%;
+  max-height: 400px;
+}
+.comment-form input {
+  scale: calc(.95);
+  padding: 8px;
+}
 .error {
   color: red;
   font-weight: bold;
