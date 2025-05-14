@@ -34,7 +34,7 @@ router
         return res.status(500).send("500: " + e)
     }
     try{
-        professor_name = validate(xss(req.body.professor_name), validate_string, [validate_professor_name]).toLowerCase()
+        professor_name = validate(xss(req.body.professor_name), validate_string, [validate_professor_name])
         course_code= validate(xss(req.body.course_code), validate_string, [process_course_code])
         email = validate(xss(req.body.email), validate_string, [validate_stevens_email]).toLowerCase()
     }catch(e){

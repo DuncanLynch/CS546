@@ -11,8 +11,8 @@ function validate_user_name(user_name) {
 }
 
 function validate_password(password) {
-  if (typeof user_name !== "string") return false;
-  if (user_name.trim() === "") return false;
+  if (typeof password !== "string") return false;
+  if (password.trim() === "") return false;
   if (password.length === 0)
       return false;
 
@@ -31,7 +31,7 @@ $(document).ready(function() {
       const password = $('#password').val().trim();
       let isValid = true;
       let errorMessages = [];
-      if (!userName || !validate_user_name(user_name)) {
+      if (!userName || !validate_user_name(userName)) {
         isValid = false;
         errorMessages.push('Username is invalid.');
       }
